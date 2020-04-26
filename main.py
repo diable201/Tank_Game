@@ -53,14 +53,15 @@ class PlayerTank(pygame.sprite.Sprite):
         self.shoot_delay = 165
         self.last_shot = pygame.time.get_ticks()
 
+
     def update(self):
-        self.speedx = 0
+        self.speedx = 5
         self.speedy = 0
         press = pygame.key.get_pressed()
         if press[pygame.K_a]:
-            self.speedx = -5
+            self.rect.x -= self.speedx
         if press[pygame.K_d]:
-            self.speedx = 5
+            self.rect.x += self.speedx
         if press[pygame.K_w]:
             self.speedy = -5
         if press[pygame.K_s]:
@@ -69,18 +70,19 @@ class PlayerTank(pygame.sprite.Sprite):
             self.shoot()
 
         # Acceleration
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
+        # self.rect.x += self.speedx
+        # self.rect.y += self.speedy
 
-        # Borders
+        # Borders. Better replace with width and height
         if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
+            self.rect.right = 100
         if self.rect.left < 0:
-            self.rect.left = 0
+            self.rect.left = 700
         if self.rect.bottom > HEIGHT:
-            self.rect.bottom = HEIGHT
+            self.rect.bottom = 100
         if self.rect.top < 0:
-            self.rect.top = 0
+            self.rect.top = 500
+            # Why this piece of shit works?
 
     def shoot(self):
         timer = pygame.time.get_ticks()
@@ -104,6 +106,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.rect.centerx = x
         self.speedy = -10  # Negative for movement up
+        self.speedx = 10
 
     def update(self):
         self.rect.y += self.speedy
@@ -134,6 +137,7 @@ class EnemyTank(pygame.sprite.Sprite):
     def update(self):
         self.speedx = 0
         self.speedy = 0
+
         press = pygame.key.get_pressed()
         if press[pygame.K_LEFT]:
             self.speedx = -5
@@ -184,6 +188,25 @@ def start_menu():
                 pygame.quit()
             if key.type == pygame.KEYUP:
                 menu = False
+
+
+def end_menu():
+    screen.blit(background, background_rect)
+    render(screen, "GAME OVER", 64, WIDTH / 2, HEIGHT / 4)
+    render(screen, "Press ENTER to begin again", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Or press ESCAPE to end", 22, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.flip()
+    end = True
+    while end:
+        clock.tick(FPS)
+        for key in pygame.event.get():
+            key_pressed = pygame.key.get_pressed()
+            if key.type == pygame.QUIT:
+                pygame.quit()
+            if key_pressed[pygame.K_RETURN]:
+                end = False
+            if key_pressed[pygame.K_ESCAPE]:
+                pygame.quit()
 
 
 all_sprites = pygame.sprite.Group()
