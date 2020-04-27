@@ -223,11 +223,6 @@ class EnemyTank:
         if self.y < 0:
             self.y = HEIGHT - 100
 
-    def lives(self):
-        font = pygame.font.SysFont('Arial', 25)
-        lives = font.render("Player2: " + str(self.lives), True, BLACK)
-        screen.blit(lives, (25, 25))
-
 
 def player_1_lives():
     font = pygame.font.SysFont("Arial", 25)
