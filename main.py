@@ -1,5 +1,6 @@
 import pygame
 import random
+
 from os import path
 from enum import Enum
 
@@ -31,7 +32,7 @@ explosion_sound_tank = pygame.mixer.Sound(path.join(sound_dir, 'explosion_tank.o
 
 background_dir = path.join(path.dirname(__file__), 'Textures/Background')
 player_dir = path.join(path.dirname(__file__), 'Textures/Player')
-
+enemy_dir = path.join(path.dirname(__file__), 'Textures/Enemy')
 background = pygame.image.load(path.join(background_dir, "back.png")).convert()
 background_rect = background.get_rect()
 
@@ -64,7 +65,7 @@ class PlayerTank(pygame.sprite.Sprite):
                     d_up: Direction.UP, d_down: Direction.DOWN}
 
     def draw(self):
-        tank_c = (self.rect.x + int(self.width / 2), self.rect.y + int(self.width / 2))
+        # tank_c = (self.rect.x + int(self.width / 2), self.rect.y + int(self.width / 2))
         # pygame.draw.rect(screen, self.color,
         #                  (self.rect.x, self.rect.y, self.width, self.width))
         # pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
@@ -118,13 +119,16 @@ class PlayerTank(pygame.sprite.Sprite):
             self.rect.y = HEIGHT - 25
 
 
-class EnemyTank:
+class EnemyTank(pygame.sprite.Sprite):
 
     def __init__(self, x, y, speed, color, d_right=pygame.K_d, d_left=pygame.K_a, d_up=pygame.K_w,
                  d_down=pygame.K_s):
+        pygame.sprite.Sprite.__init__(self)
         # Initialize player attributes, coordinates
-        self.x = x
-        self.y = y
+        self.image = pygame.image.load(path.join(enemy_dir, "player_1.png")).convert()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
         self.speed = speed
         self.color = color
         self.width = 40
@@ -138,47 +142,51 @@ class EnemyTank:
         self.direction = direction
 
     def draw(self):
-        tank_c = (self.x + int(self.width / 2), self.y + int(self.width / 2))
-        pygame.draw.rect(screen, self.color,
-                         (self.x, self.y, self.width, self.width))
-        pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
+        # tank_c = (self.x + int(self.width / 2), self.y + int(self.width / 2))
+        # pygame.draw.rect(screen, self.color,
+        #                  (self.x, self.y, self.width, self.width))
+        # pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
 
         if self.direction == Direction.RIGHT:
-            pygame.draw.line(screen, self.color, tank_c,
-                             (self.x + self.width + int(self.width / 2), self.y + int(self.width / 2)), 4)
+            self.image = pygame.image.load(path.join(enemy_dir, "player_4.png")).convert()
+            # pygame.draw.line(screen, self.color, tank_c,
+            #                  (self.x + self.width + int(self.width / 2), self.y + int(self.width / 2)), 4)
 
         if self.direction == Direction.LEFT:
-            pygame.draw.line(screen, self.color, tank_c, (
-                self.x - int(self.width / 2), self.y + int(self.width / 2)), 4)
+            self.image = pygame.image.load(path.join(enemy_dir, "player_2.png")).convert()
+            # pygame.draw.line(screen, self.color, tank_c, (
+            #     self.x - int(self.width / 2), self.y + int(self.width / 2)), 4)
 
         if self.direction == Direction.UP:
-            pygame.draw.line(screen, self.color, tank_c, (self.x + int(self.width / 2), self.y - int(self.width / 2)),
-                             4)
+            self.image = pygame.image.load(path.join(enemy_dir, "player_1.png")).convert()
+            # pygame.draw.line(screen, self.color, tank_c, (self.x + int(self.width / 2), self.y - int(self.width / 2)),
+            #                  4)
 
         if self.direction == Direction.DOWN:
-            pygame.draw.line(screen, self.color, tank_c,
-                             (self.x + int(self.width / 2), self.y + self.width + int(self.width / 2)), 4)
+            self.image = pygame.image.load(path.join(enemy_dir, "player_3.png")).convert()
+            # pygame.draw.line(screen, self.color, tank_c,
+            #                  (self.x + int(self.width / 2), self.y + self.width + int(self.width / 2)), 4)
 
     def move(self):
         if self.direction == Direction.LEFT:
-            self.x -= self.speed
+            self.rect.x -= self.speed
         if self.direction == Direction.RIGHT:
-            self.x += self.speed
+            self.rect.x += self.speed
         if self.direction == Direction.UP:
-            self.y -= self.speed
+            self.rect.y -= self.speed
         if self.direction == Direction.DOWN:
-            self.y += self.speed
+            self.rect.y += self.speed
         self.draw()
 
         # Borders
-        if self.x > WIDTH:
-            self.x = WIDTH - 975
-        if self.x < 0:
-            self.x = WIDTH - 25
-        if self.y > HEIGHT:
-            self.y = HEIGHT - 775
-        if self.y < 0:
-            self.y = HEIGHT - 25
+        if self.rect.x > WIDTH:
+            self.rect.x = WIDTH - 975
+        if self.rect.x < 0:
+            self.rect.x = WIDTH - 25
+        if self.rect.y > HEIGHT:
+            self.rect.y = HEIGHT - 775
+        if self.rect.y < 0:
+            self.rect.y = HEIGHT - 25
 
 
 class Bullet:
@@ -226,16 +234,16 @@ class Bullet:
     def collision(self, Tank):
 
         if Tank.direction == Direction.RIGHT and self.drop:
-            if (Tank.x < self.x < Tank.x + 60) and (Tank.y < self.y < Tank.y + 40):
+            if (Tank.rect.x < self.x < Tank.rect.x + 60) and (Tank.rect.y < self.y < Tank.rect.y + 40):
                 return True
         if Tank.direction == Direction.LEFT and self.drop:
-            if (Tank.x - 20 < self.x < Tank.x + 40) and (Tank.y < self.y < Tank.y + 40):
+            if (Tank.rect.x - 20 < self.x < Tank.rect.x + 40) and (Tank.rect.y < self.y < Tank.rect.y + 40):
                 return True
         if Tank.direction == Direction.UP and self.drop:
-            if (Tank.y - 20 < self.y < Tank.y + 40) and (Tank.y < self.x < Tank.x + 40):
+            if (Tank.rect.y - 20 < self.y < Tank.rect.y + 40) and (Tank.rect.y < self.x < Tank.rect.x + 40):
                 return True
         if Tank.direction == Direction.DOWN and self.drop:
-            if (Tank.y < self.y < Tank.y + 60) and (Tank.x < self.x < Tank.x + 40):
+            if (Tank.rect.y < self.y < Tank.rect.y + 60) and (Tank.rect.x < self.x < Tank.rect.x + 40):
                 return True
 
 
@@ -260,9 +268,25 @@ class FirstAidKit(pygame.sprite.Sprite):
         self.image = pygame.image.load(path.join(player_dir, "first_aid_kit.png")).convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.x = 400
-        self.y = 500
-    #     self.speedy = 4
+        self.rect.x = x
+        self.rect.y = y
+        self.last = pygame.time.get_ticks()
+        self.last = pygame.time.get_ticks()
+        self.cooldown = 3000 # 3 seconds
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last >= self.cooldown:
+            self.last = now
+            self.kill()
+
+
+    # def hide(self):
+    #     self.hidden = True
+    #     self.hide_timer = pygame.time.get_ticks()
+    #     self.rect.center = (WIDTH / 2, HEIGHT - 10)
+
+        #     self.speedy = 4
     #
     # def update(self):
     #     self.rect.y += self.speedy
@@ -332,13 +356,14 @@ player_1 = PlayerTank(300, 300, 2, (255, 123, 100))
 player_2 = EnemyTank(100, 100, 2, (100, 230, 40))
 bullet_player_1 = Bullet(player_1.rect.x + int(player_1.width / 2), player_1.rect.y + int(player_1.width / 2), (255, 123, 100),
                          False)
-bullet_player_2 = Bullet(player_2.x + int(player_2.width / 2), player_2.y + int(player_2.width / 2), (0, 120, 255),
+bullet_player_2 = Bullet(player_2.rect.x + int(player_2.width / 2), player_2.rect.y + int(player_2.width / 2), (0, 120, 255),
                          False)
 tanks = [player_1, player_2]
 bullets = [bullet_player_1, bullet_player_2]
 
+# TODO add random coordinates
 wallList = [
-    Wall(70, 100),
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
     Wall(100, 100),
     Wall(130, 100),
     Wall(160, 100),
@@ -346,9 +371,11 @@ wallList = [
     Wall(400, 100)
 ]
 
-firs_ait_kit = pygame.sprite.Group()
-all_sprites = pygame.sprite.Group(wallList)
+all_sprites = pygame.sprite.Group()
+first_ait_kit = pygame.sprite.Group()
+walls = pygame.sprite.Group(wallList)
 all_sprites.add(player_1)
+all_sprites.add(player_2)
 
 
 while Game:
@@ -388,15 +415,15 @@ while Game:
         explosion_sound_tank.play()
         player_1.lives -= 1
         bullet_player_2.drop = False
-        bullet_player_2.x, bullet_player_2.y = player_2.x + int(player_2.width / 2), player_2.y + int(
+        bullet_player_2.x, bullet_player_2.y = player_2.rect.x + int(player_2.width / 2), player_2.rect.y + int(
             player_2.width / 2)
 
-    all_sprites.update()
-
-    if random.random() > 0.8:
+    if random.randrange(0, 100) < 1: # 1 % probability
         health_boost = FirstAidKit(random.randint(50, WIDTH), random.randint(50, HEIGHT))
         all_sprites.add(health_boost)
-        firs_ait_kit.add(health_boost)
+        first_ait_kit.add(health_boost)
+
+    all_sprites.update()
 
     if Game_Over:
         end_menu()
