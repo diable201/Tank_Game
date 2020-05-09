@@ -1,5 +1,5 @@
 import pygame
-
+import random
 from os import path
 from enum import Enum
 
@@ -9,6 +9,9 @@ FPS = 50
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
 pygame.init()
 pygame.display.set_caption('Armored Kill')
@@ -27,6 +30,7 @@ shoot_sound_enemy = pygame.mixer.Sound(path.join(sound_dir, 'shoot_enemy.ogg'))
 explosion_sound_tank = pygame.mixer.Sound(path.join(sound_dir, 'explosion_tank.ogg'))
 
 background_dir = path.join(path.dirname(__file__), 'Textures/Background')
+player_dir = path.join(path.dirname(__file__), 'Textures/Player')
 
 background = pygame.image.load(path.join(background_dir, "back.png")).convert()
 background_rect = background.get_rect()
@@ -224,16 +228,48 @@ class EnemyTank:
             self.y = HEIGHT - 100
 
 
+class Wall(pygame.sprite.Sprite):
+
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.Surface((30, 30))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+        self.x = x
+        self.y = y
+
+
+class FirstAidKit(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+    # Position of FirstAidKit, velocity, texture
+        self.image = pygame.image.load(path.join(player_dir, "first_aid_kit.png")).convert()
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.x = 400
+        self.y = 500
+    #     self.speedy = 4
+    #
+    # def update(self):
+    #     self.rect.y += self.speedy
+    # # if FirstAidKit goes off bottom of window, destroy it
+    #     if self.rect.top > HEIGHT:
+    #         self.kill()
+
+
 def player_1_lives():
     font = pygame.font.SysFont("Arial", 25)
-    pnt = font.render("Player 1: " + str(player_1.lives), True, (255, 0, 0))
-    screen.blit(pnt, (650, 20))
+    lives = font.render("Player 1: " + str(player_1.lives), True, (255, 0, 0))
+    screen.blit(lives, (650, 20))
 
 
 def player_2_lives():
     font = pygame.font.SysFont("Arial", 25)
-    pnt = font.render("Player 2: " + str(player_2.lives), True, (255, 0, 0))
-    screen.blit(pnt, (650, 40))
+    lives = font.render("Player 2: " + str(player_2.lives), True, (255, 0, 0))
+    screen.blit(lives, (650, 40))
 
 
 def start_menu():
@@ -290,6 +326,19 @@ bullet_player_2 = Bullet(player_2.x + int(player_2.width / 2), player_2.y + int(
 tanks = [player_1, player_2]
 bullets = [bullet_player_1, bullet_player_2]
 
+wallList = [
+    Wall(70, 100),
+    Wall(100, 100),
+    Wall(130, 100),
+    Wall(160, 100),
+    Wall(190, 100),
+    Wall(400, 100)
+]
+
+all_sprites = pygame.sprite.Group()
+firs_ait_kit = pygame.sprite.Group()
+all_sprites.add(wallList)
+
 while Game:
     clock.tick(FPS)
     if New_Game:
@@ -330,14 +379,27 @@ while Game:
         bullet_player_2.x, bullet_player_2.y = player_2.x + int(player_2.width / 2), player_2.y + int(
             player_2.width / 2)
 
+    all_sprites.update()
+
+    if random.random() > 0.8:
+        health_boost = FirstAidKit(random.randint(50, WIDTH), random.randint(50, HEIGHT))
+        all_sprites.add(health_boost)
+        firs_ait_kit.add(health_boost)
+
     if Game_Over:
         end_menu()
         Game_Over = False
 
-    screen.blit(background, background_rect)
+    screen.fill(BLACK)
+    all_sprites.draw(screen)
+    # screen.blit(background, background_rect)
 
     for tank in tanks:
         tank.move()
+
+    # Render walls
+    for wall in wallList:
+        screen.blit(wall.image, (wall.x, wall.y))
 
     if player_1.lives == 0 or player_2.lives == 0:
         Game_Over = True
