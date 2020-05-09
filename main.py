@@ -3,9 +3,9 @@ import random
 from os import path
 from enum import Enum
 
-WIDTH = 800
-HEIGHT = 600
-FPS = 50
+WIDTH = 1000
+HEIGHT = 800
+FPS = 60
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -21,8 +21,8 @@ clock = pygame.time.Clock()
 # Load sound directory and main theme for game
 sound_dir = path.join(path.dirname(__file__), 'Sound')
 pygame.mixer.init()
-pygame.mixer.music.load(path.join(sound_dir, 'ost.ogg'))
-pygame.mixer.music.play(-1)  # for loop
+# pygame.mixer.music.load(path.join(sound_dir, 'ost.ogg'))
+# pygame.mixer.music.play(-1)  # for loop
 pygame.mixer.music.set_volume(10)
 
 shoot_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'shoot_player.ogg'))
@@ -43,126 +43,79 @@ class Direction(Enum):
     RIGHT = 4
 
 
-class PlayerTank:
+class PlayerTank(pygame.sprite.Sprite):
 
     def __init__(self, x, y, speed, color, d_right=pygame.K_RIGHT, d_left=pygame.K_LEFT, d_up=pygame.K_UP,
                  d_down=pygame.K_DOWN):
-        self.x = x
-        self.y = y
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
         self.speed = speed
         self.color = color
         self.lives = 3
-        self.width = 40
+        self.width = 50
         self.direction = Direction.RIGHT
-        self.shoot_delay = 165
-        self.last_shot = pygame.time.get_ticks()
+        # self.shoot_delay = 165
+        # self.last_shot = pygame.time.get_ticks()
 
         self.KEY = {d_right: Direction.RIGHT, d_left: Direction.LEFT,
                     d_up: Direction.UP, d_down: Direction.DOWN}
 
     def draw(self):
-        tank_c = (self.x + int(self.width / 2), self.y + int(self.width / 2))
-        pygame.draw.rect(screen, self.color,
-                         (self.x, self.y, self.width, self.width))
-        pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
+        tank_c = (self.rect.x + int(self.width / 2), self.rect.y + int(self.width / 2))
+        # pygame.draw.rect(screen, self.color,
+        #                  (self.rect.x, self.rect.y, self.width, self.width))
+        # pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
 
         if self.direction == Direction.RIGHT:
-            pygame.draw.line(screen, self.color, tank_c,
-                             (self.x + self.width + int(self.width / 2), self.y + int(self.width / 2)), 4)
+            self.image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
+
+            # pygame.draw.line(screen, self.color, tank_c,
+            #                  (self.rect.x + self.width + int(self.width / 2), self.rect.y + int(self.width / 2)), 4)
 
         if self.direction == Direction.LEFT:
-            pygame.draw.line(screen, self.color, tank_c, (
-                self.x - int(self.width / 2), self.y + int(self.width / 2)), 4)
+            self.image = pygame.image.load(path.join(player_dir, "player_2.png")).convert()
+
+            # pygame.draw.line(screen, self.color, tank_c, (
+            #     self.rect.x - int(self.width / 2), self.rect.y + int(self.width / 2)), 4)
 
         if self.direction == Direction.UP:
-            pygame.draw.line(screen, self.color, tank_c, (self.x + int(self.width / 2), self.y - int(self.width / 2)),
-                             4)
+            self.image = pygame.image.load(path.join(player_dir, "player_1.png")).convert()
+
+            # pygame.draw.line(screen, self.color, tank_c, (self.rect.x + int(self.width / 2), self.rect.y - int(self.width / 2)),
+            #                  4)
 
         if self.direction == Direction.DOWN:
-            pygame.draw.line(screen, self.color, tank_c,
-                             (self.x + int(self.width / 2), self.y + self.width + int(self.width / 2)), 4)
+            self.image = pygame.image.load(path.join(player_dir, "player_4.png")).convert()
+
+            # pygame.draw.line(screen, self.color, tank_c,
+            #                  (self.rect.x + int(self.width / 2), self.rect.y + self.width + int(self.width / 2)), 4)
 
     def change_direction(self, direction):
         self.direction = direction
 
     def move(self):
         if self.direction == Direction.LEFT:
-            self.x -= self.speed
+            self.rect.x -= self.speed
         if self.direction == Direction.RIGHT:
-            self.x += self.speed
+            self.rect.x += self.speed
         if self.direction == Direction.UP:
-            self.y -= self.speed
+            self.rect.y -= self.speed
         if self.direction == Direction.DOWN:
-            self.y += self.speed
+            self.rect.y += self.speed
         self.draw()
 
         # Borders
-        if self.x > WIDTH:
-            self.x = WIDTH - 700
-        if self.x < 0:
-            self.x = WIDTH - 100
-        if self.y > HEIGHT:
-            self.y = HEIGHT - 500
-        if self.y < 0:
-            self.y = HEIGHT - 100
-
-
-class Bullet:
-    def __init__(self, x, y, color, drop):
-        self.x = x
-        self.y = y
-        self.color = color
-        self.speed = 1
-        self.radius = 4
-        self.dx = 0
-        self.dy = 0
-        self.drop = False
-
-    def draw(self):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
-
-    def fire(self):
-        if self.drop:
-            self.x += self.dx
-            self.y += self.dy
-            self.draw()
-
-    def shoot(self, Tank):
-        shoot_sound_enemy.play()
-        if Tank.direction == Direction.RIGHT:
-            self.x, self.y = Tank.x + int(Tank.width / 2), Tank.y + int(Tank.width / 2)
-            self.dx, self.dy = 15, 0
-        if Tank.direction == Direction.LEFT:
-            self.x, self.y = Tank.x + int(Tank.width / 2), Tank.y + int(Tank.width / 2)
-            self.dx, self.dy = - 15, 0
-        if Tank.direction == Direction.UP:
-            self.x, self.y = Tank.x + int(Tank.width / 2), Tank.y + int(Tank.width / 2)
-            self.dx, self.dy = 0, -15
-        if Tank.direction == Direction.DOWN:
-            self.x, self.y = Tank.x + int(Tank.width / 2), Tank.y + int(Tank.width / 2)
-            self.dx, self.dy = 0, 15
-
-    def remove(self):
-        if self.x >= WIDTH or self.x <= 0:
-            return True
-        if self.y >= HEIGHT or self.y <= 0:
-            return True
-        return False
-
-    def collision(self, Tank):
-
-        if Tank.direction == Direction.RIGHT and self.drop:
-            if (Tank.x < self.x < Tank.x + 60) and (Tank.y < self.y < Tank.y + 40):
-                return True
-        if Tank.direction == Direction.LEFT and self.drop:
-            if (Tank.x - 20 < self.x < Tank.x + 40) and (Tank.y < self.y < Tank.y + 40):
-                return True
-        if Tank.direction == Direction.UP and self.drop:
-            if (Tank.y - 20 < self.y < Tank.y + 40) and (Tank.y < self.x < Tank.x + 40):
-                return True
-        if Tank.direction == Direction.DOWN and self.drop:
-            if (Tank.y < self.y < Tank.y + 60) and (Tank.x < self.x < Tank.x + 40):
-                return True
+        if self.rect.x > WIDTH:
+            self.rect.x = WIDTH - 975
+        if self.rect.x < 0:
+            self.rect.x = WIDTH - 25
+        if self.rect.y > HEIGHT:
+            self.rect.y = HEIGHT - 775
+        if self.rect.y < 0:
+            self.rect.y = HEIGHT - 25
 
 
 class EnemyTank:
@@ -219,13 +172,71 @@ class EnemyTank:
 
         # Borders
         if self.x > WIDTH:
-            self.x = WIDTH - 700
+            self.x = WIDTH - 975
         if self.x < 0:
-            self.x = WIDTH - 100
+            self.x = WIDTH - 25
         if self.y > HEIGHT:
-            self.y = HEIGHT - 500
+            self.y = HEIGHT - 775
         if self.y < 0:
-            self.y = HEIGHT - 100
+            self.y = HEIGHT - 25
+
+
+class Bullet:
+    def __init__(self, x, y, color, drop):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.speed = 1
+        self.radius = 4
+        self.dx = 0
+        self.dy = 0
+        self.drop = False
+
+    def draw(self):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+
+    def fire(self):
+        if self.drop:
+            self.x += self.dx
+            self.y += self.dy
+            self.draw()
+
+    def shoot(self, Tank):
+        shoot_sound_enemy.play()
+        if Tank.direction == Direction.RIGHT:
+            self.x, self.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
+            self.dx, self.dy = 15, 0
+        if Tank.direction == Direction.LEFT:
+            self.x, self.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
+            self.dx, self.dy = - 15, 0
+        if Tank.direction == Direction.UP:
+            self.x, self.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
+            self.dx, self.dy = 0, -15
+        if Tank.direction == Direction.DOWN:
+            self.x, self.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
+            self.dx, self.dy = 0, 15
+
+    def remove(self):
+        if self.x >= WIDTH or self.x <= 0:
+            return True
+        if self.y >= HEIGHT or self.y <= 0:
+            return True
+        return False
+
+    def collision(self, Tank):
+
+        if Tank.direction == Direction.RIGHT and self.drop:
+            if (Tank.x < self.x < Tank.x + 60) and (Tank.y < self.y < Tank.y + 40):
+                return True
+        if Tank.direction == Direction.LEFT and self.drop:
+            if (Tank.x - 20 < self.x < Tank.x + 40) and (Tank.y < self.y < Tank.y + 40):
+                return True
+        if Tank.direction == Direction.UP and self.drop:
+            if (Tank.y - 20 < self.y < Tank.y + 40) and (Tank.y < self.x < Tank.x + 40):
+                return True
+        if Tank.direction == Direction.DOWN and self.drop:
+            if (Tank.y < self.y < Tank.y + 60) and (Tank.x < self.x < Tank.x + 40):
+                return True
 
 
 class Wall(pygame.sprite.Sprite):
@@ -245,7 +256,7 @@ class Wall(pygame.sprite.Sprite):
 class FirstAidKit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-    # Position of FirstAidKit, velocity, texture
+        # Position of FirstAidKit, velocity, texture
         self.image = pygame.image.load(path.join(player_dir, "first_aid_kit.png")).convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -262,14 +273,14 @@ class FirstAidKit(pygame.sprite.Sprite):
 
 def player_1_lives():
     font = pygame.font.SysFont("Arial", 25)
-    lives = font.render("Player 1: " + str(player_1.lives), True, (255, 0, 0))
-    screen.blit(lives, (650, 20))
+    lives = font.render("Player 1: " + str(player_1.lives), True, RED)
+    screen.blit(lives, (850, 20))
 
 
 def player_2_lives():
     font = pygame.font.SysFont("Arial", 25)
-    lives = font.render("Player 2: " + str(player_2.lives), True, (255, 0, 0))
-    screen.blit(lives, (650, 40))
+    lives = font.render("Player 2: " + str(player_2.lives), True, RED)
+    screen.blit(lives, (850, 40))
 
 
 def start_menu():
@@ -319,7 +330,7 @@ Game = True
 
 player_1 = PlayerTank(300, 300, 2, (255, 123, 100))
 player_2 = EnemyTank(100, 100, 2, (100, 230, 40))
-bullet_player_1 = Bullet(player_1.x + int(player_1.width / 2), player_1.y + int(player_1.width / 2), (255, 123, 100),
+bullet_player_1 = Bullet(player_1.rect.x + int(player_1.width / 2), player_1.rect.y + int(player_1.width / 2), (255, 123, 100),
                          False)
 bullet_player_2 = Bullet(player_2.x + int(player_2.width / 2), player_2.y + int(player_2.width / 2), (0, 120, 255),
                          False)
@@ -335,9 +346,10 @@ wallList = [
     Wall(400, 100)
 ]
 
-all_sprites = pygame.sprite.Group()
 firs_ait_kit = pygame.sprite.Group()
-all_sprites.add(wallList)
+all_sprites = pygame.sprite.Group(wallList)
+all_sprites.add(player_1)
+
 
 while Game:
     clock.tick(FPS)
@@ -370,7 +382,7 @@ while Game:
         explosion_sound_tank.play()
         player_2.lives -= 1
         bullet_player_1.drop = False
-        bullet_player_1.x, bullet_player_1.y = player_1.x + int(player_1.width / 2), player_1.y + int(
+        bullet_player_1.x, bullet_player_1.y = player_1.rect.x + int(player_1.width / 2), player_1.rect.y + int(
             player_1.width / 2)
     if bullet_player_2.collision(player_1):
         explosion_sound_tank.play()
