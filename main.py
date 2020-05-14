@@ -4,8 +4,8 @@ import random
 from os import path
 from enum import Enum
 
-WIDTH = 1000
-HEIGHT = 800
+WIDTH = 800
+HEIGHT = 600
 FPS = 60
 
 BLACK = (0, 0, 0)
@@ -257,8 +257,8 @@ class Wall(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.width = self.image.get_width()
         self.height = self.image.get_height()
-        self.x = x
-        self.y = y
+        self.rect.x = x
+        self.rect.y = y
 
 
 class FirstAidKit(pygame.sprite.Sprite):
@@ -270,7 +270,6 @@ class FirstAidKit(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.last = pygame.time.get_ticks()
         self.last = pygame.time.get_ticks()
         self.cooldown = 3000 # 3 seconds
 
@@ -364,11 +363,11 @@ bullets = [bullet_player_1, bullet_player_2]
 # TODO add random coordinates
 wallList = [
     Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
-    Wall(100, 100),
-    Wall(130, 100),
-    Wall(160, 100),
-    Wall(190, 100),
-    Wall(400, 100)
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT))
 ]
 
 all_sprites = pygame.sprite.Group()
@@ -418,10 +417,14 @@ while Game:
         bullet_player_2.x, bullet_player_2.y = player_2.rect.x + int(player_2.width / 2), player_2.rect.y + int(
             player_2.width / 2)
 
-    if random.randrange(0, 100) < 1: # 1 % probability
+    if random.randrange(0, 100) < 0.1: # 1 % probability
         health_boost = FirstAidKit(random.randint(50, WIDTH), random.randint(50, HEIGHT))
         all_sprites.add(health_boost)
         first_ait_kit.add(health_boost)
+
+    hits_wall = pygame.sprite.spritecollide(player_1, walls, True)
+    for hit_wall in hits_wall:
+        player_1.lives += 1
 
     all_sprites.update()
 
@@ -438,7 +441,7 @@ while Game:
 
     # Render walls
     for wall in wallList:
-        screen.blit(wall.image, (wall.x, wall.y))
+        screen.blit(wall.image, (wall.rect.x, wall.rect.y))
 
     if player_1.lives == 0 or player_2.lives == 0:
         Game_Over = True
