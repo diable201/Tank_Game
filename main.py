@@ -4,8 +4,8 @@ import random
 from os import path
 from enum import Enum
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1000
+HEIGHT = 800
 FPS = 60
 
 BLACK = (0, 0, 0)
@@ -56,7 +56,7 @@ class PlayerTank(pygame.sprite.Sprite):
         self.speed = speed
         self.color = color
         self.lives = 3
-        self.width = 50
+        self.width = 15
         self.direction = Direction.RIGHT
         # self.shoot_delay = 165
         # self.last_shot = pygame.time.get_ticks()
@@ -65,34 +65,34 @@ class PlayerTank(pygame.sprite.Sprite):
                     d_up: Direction.UP, d_down: Direction.DOWN}
 
     def draw(self):
-        # tank_c = (self.rect.x + int(self.width / 2), self.rect.y + int(self.width / 2))
-        # pygame.draw.rect(screen, self.color,
-        #                  (self.rect.x, self.rect.y, self.width, self.width))
-        # pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
+        tank_c = (self.rect.x + int(self.width / 2), self.rect.y + int(self.width / 2))
+        pygame.draw.rect(screen, self.color,
+                         (self.rect.x, self.rect.y, self.width, self.width))
+        pygame.draw.circle(screen, self.color, tank_c, int(self.width / 2))
 
         if self.direction == Direction.RIGHT:
             self.image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
 
-            # pygame.draw.line(screen, self.color, tank_c,
-            #                  (self.rect.x + self.width + int(self.width / 2), self.rect.y + int(self.width / 2)), 4)
+            pygame.draw.line(screen, self.color, tank_c,
+                             (self.rect.x + self.width + int(self.width / 2), self.rect.y + int(self.width / 2)), 4)
 
         if self.direction == Direction.LEFT:
             self.image = pygame.image.load(path.join(player_dir, "player_2.png")).convert()
 
-            # pygame.draw.line(screen, self.color, tank_c, (
-            #     self.rect.x - int(self.width / 2), self.rect.y + int(self.width / 2)), 4)
+            pygame.draw.line(screen, self.color, tank_c, (
+                self.rect.x - int(self.width / 2), self.rect.y + int(self.width / 2)), 4)
 
         if self.direction == Direction.UP:
             self.image = pygame.image.load(path.join(player_dir, "player_1.png")).convert()
 
-            # pygame.draw.line(screen, self.color, tank_c, (self.rect.x + int(self.width / 2), self.rect.y - int(self.width / 2)),
-            #                  4)
+            pygame.draw.line(screen, self.color, tank_c, (self.rect.x + int(self.width / 2), self.rect.y - int(self.width / 2)),
+                             4)
 
         if self.direction == Direction.DOWN:
             self.image = pygame.image.load(path.join(player_dir, "player_4.png")).convert()
 
-            # pygame.draw.line(screen, self.color, tank_c,
-            #                  (self.rect.x + int(self.width / 2), self.rect.y + self.width + int(self.width / 2)), 4)
+            pygame.draw.line(screen, self.color, tank_c,
+                             (self.rect.x + int(self.width / 2), self.rect.y + self.width + int(self.width / 2)), 4)
 
     def change_direction(self, direction):
         self.direction = direction
@@ -131,7 +131,7 @@ class EnemyTank(pygame.sprite.Sprite):
         self.rect.y = y
         self.speed = speed
         self.color = color
-        self.width = 40
+        self.width = 50
         self.lives = 3
         self.direction = Direction.LEFT
         self.last_shot = pygame.time.get_ticks()
@@ -362,6 +362,7 @@ bullets = [bullet_player_1, bullet_player_2]
 
 # TODO add random coordinates
 wallList = [
+    Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
     Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
     Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
     Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT)),
