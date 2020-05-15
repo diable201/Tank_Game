@@ -206,20 +206,20 @@ class Direction(Enum):
     RIGHT = 4
 
 
-def draw_tank(x, y, width, height, direction, **kwargs):
-    print(**kwargs)
-    tank_c = (x + int(width / 2), y + int(width / 2))
-    pygame.draw.rect(screen, (255, 255, 255), (x, y, width, height))
-    pygame.draw.circle(screen, (255, 255, 255), tank_c, int(width / 2))
-    if direction == UP:
-        # image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
-        pygame.draw.line(screen, (255, 255, 255), tank_c, (x + int(width / 2), y - int(width / 2)), 4)
-    if direction == DOWN:
-        pygame.draw.line(screen, (255, 255, 255), tank_c, (x + int(width / 2), y + width + int(width / 2)), 4)
-    if direction == LEFT:
-        pygame.draw.line(screen, (255, 255, 255), tank_c, (x - int(width / 2), y + int(width / 2)), 4)
-    if direction == RIGHT:
-        pygame.draw.line(screen, (255, 255, 255), tank_c, (x + width + int(width / 2), y + int(width / 2)), 4)
+# def draw_tank(x, y, width, height, direction, **kwargs):
+#     print(**kwargs)
+#     tank_c = (x + int(width / 2), y + int(width / 2))
+#     pygame.draw.rect(screen, (255, 255, 255), (x, y, width, height))
+#     pygame.draw.circle(screen, (255, 255, 255), tank_c, int(width / 2))
+#     if direction == UP:
+#         # image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
+#         pygame.draw.line(screen, (255, 255, 255), tank_c, (x + int(width / 2), y - int(width / 2)), 4)
+#     if direction == DOWN:
+#         pygame.draw.line(screen, (255, 255, 255), tank_c, (x + int(width / 2), y + width + int(width / 2)), 4)
+#     if direction == LEFT:
+#         pygame.draw.line(screen, (255, 255, 255), tank_c, (x - int(width / 2), y + int(width / 2)), 4)
+#     if direction == RIGHT:
+#         pygame.draw.line(screen, (255, 255, 255), tank_c, (x + width + int(width / 2), y + int(width / 2)), 4)
 
 
 def draw_bullet(x, y, width, height, direction):
