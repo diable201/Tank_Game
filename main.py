@@ -3,12 +3,13 @@ import random
 import pika
 import uuid
 import json
+
 from os import path
 from enum import Enum
 from threading import Thread
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1000
+HEIGHT = 800
 FPS = 60
 POWER_UP_TIME = 5000
 
@@ -28,7 +29,7 @@ sound_dir = path.join(path.dirname(__file__), 'Sound')
 pygame.mixer.init()
 # pygame.mixer.music.load(path.join(sound_dir, 'ost.ogg'))
 # pygame.mixer.music.play(-1)  # for loop
-pygame.mixer.music.set_volume(10)
+pygame.mixer.music.set_volume(5)
 
 shoot_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'shoot_player.ogg'))
 shoot_sound_enemy = pygame.mixer.Sound(path.join(sound_dir, 'shoot_enemy.ogg'))
@@ -38,9 +39,25 @@ background_dir = path.join(path.dirname(__file__), 'Textures/Background')
 player_dir = path.join(path.dirname(__file__), 'Textures/Player')
 enemy_dir = path.join(path.dirname(__file__), 'Textures/Enemy')
 effects_dir = path.join(path.dirname(__file__), 'Textures/Effects')
+explosions_dir = path.join(path.dirname(__file__), 'Textures/Explosions')
 walls_dir = path.join(path.dirname(__file__), 'Textures/Walls')
 background = pygame.image.load(path.join(background_dir, "back.png")).convert()
 background_rect = background.get_rect()
+
+# Sprites for animating various explosions
+animation_of_explosion = {'large': [], 'small': [], 'wall': []}
+for animation in range(1, 9):
+    filename = 'explosion_{}.png'.format(animation)
+    img = pygame.image.load(path.join(explosions_dir, filename)).convert()
+    img.set_colorkey(BLACK)
+    img_large = pygame.transform.scale(img, (75, 75))
+    animation_of_explosion['large'].append(img_large)
+    img_small = pygame.transform.scale(img, (32, 32))
+    animation_of_explosion['small'].append(img_small)
+    filename = 'wall_explosion_{}.png'.format(animation)
+    img_player = pygame.image.load(path.join(explosions_dir, filename)).convert()
+    img_player.set_colorkey(BLACK)
+    animation_of_explosion['wall'].append(img_player)
 
 
 class Direction(Enum):
@@ -288,6 +305,35 @@ class SuperPowerKit(pygame.sprite.Sprite):
             self.kill()
 
 
+class Explosion(pygame.sprite.Sprite):
+
+    def __init__(self, center, size):
+        pygame.sprite.Sprite.__init__(self)
+
+        # Position of explosion
+        self.size = size
+        self.image = animation_of_explosion[self.size][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 50
+
+    def update(self):
+        # Drawing explosion sprites until all sprites are drawn
+        timer = pygame.time.get_ticks()
+        if timer - self.last_update > self.frame_rate:
+            self.last_update = timer
+            self.frame += 1
+            if self.frame == len(animation_of_explosion[self.size]):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = animation_of_explosion[self.size][self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
+
+
 def player_1_lives():
     font = pygame.font.SysFont("Arial", 25)
     lives = font.render("Player 1: " + str(player_1.lives), True, RED)
@@ -301,6 +347,11 @@ def player_2_lives():
 
 
 def multiplayer():
+
+    WIDTH = 800
+    HEIGHT = 600
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('Armored Kill')
     IP = '34.254.177.17'
     PORT = 5672
     VIRTUAL_HOST = 'dar-tanks'
@@ -471,12 +522,10 @@ def multiplayer():
             if direction == RIGHT:
                 pygame.draw.line(screen, (255, 255, 255), tank_c, (x + width + int(width / 2), y + int(width / 2)), 4)
 
-
     UP = 'UP'
     DOWN = 'DOWN'
     LEFT = 'LEFT'
     RIGHT = 'RIGHT'
-
 
     MOVE_KEYS = {
         pygame.K_w: UP,
@@ -500,13 +549,11 @@ def multiplayer():
     #     if direction == RIGHT:
     #         pygame.draw.line(screen, (255, 255, 255), tank_c, (x + width + int(width / 2), y + int(width / 2)), 4)
 
-
     def draw_bullet(x, y, width, height, direction):
         bullet_c = (x + int(width / 2), y + int(width / 2))
         pygame.draw.rect(screen, (255, 255, 255),
                          (x, y, width, height))
         pygame.draw.rect(screen, (255, 255, 255), bullet_c)
-
 
     class Button:
 
@@ -524,10 +571,8 @@ def multiplayer():
             textRect.center = (100, 100)
             screen.blit(text, textRect)
 
-
     def click_button():
         print('ok good')
-
 
     player = TankConsumerClient('room-7', 200, 200)
     # tanks = [player]
@@ -643,11 +688,10 @@ def start_menu():
         for key in pygame.event.get():
             if key.type == pygame.QUIT:
                 pygame.quit()
+            pressed = pygame.key.get_pressed()
+            if pressed[pygame.K_1]:
                 menu = False
-            if key.type == pygame.KEYDOWN:
-                if key.type == pygame.K_w:
-                    multiplayer()
-            if key.type == pygame.KEYUP:
+            if pressed[pygame.K_w]:
                 multiplayer()
 
 
@@ -739,15 +783,19 @@ while Game:
                 bullet.drop = False
 
     if bullet_player_1.collision(player_2):
+        explosion = Explosion(player_2.rect.center, 'large')
+        all_sprites.add(explosion)
         explosion_sound_tank.play()
         player_2.lives -= 1
         bullet_player_1.drop = False
     if bullet_player_2.collision(player_1):
+        explosion = Explosion(player_1.rect.center, 'large')
+        all_sprites.add(explosion)
         explosion_sound_tank.play()
         player_1.lives -= 1
         bullet_player_2.drop = False
     if random.randrange(0, 100) < 0.1:  # 1 % probability
-        health_boost = SuperPowerKit(random.randint(50, WIDTH), random.randint(50, HEIGHT))
+        health_boost = SuperPowerKit(random.randint(50, WIDTH - 50), random.randint(50, HEIGHT - 50))
         all_sprites.add(health_boost)
         first_ait_kit.add(health_boost)
 
@@ -755,10 +803,14 @@ while Game:
 
     hits_wall_player_2_bullet = pygame.sprite.spritecollide(bullet_player_2, walls, True)
     for hit_wall in hits_wall_player_2_bullet:
+        explosion = Explosion(hit_wall.rect.center, 'wall')
+        all_sprites.add(explosion)
         bullet_player_2.kill()
 
     hits_player_2_walls = pygame.sprite.spritecollide(player_2, walls, True)
     for hit_player in hits_player_2_walls:
+        explosion = Explosion(hit_player.rect.center, 'wall')
+        all_sprites.add(explosion)
         player_2.lives -= 1
 
     hits_super_power_player_2 = pygame.sprite.spritecollide(player_2, first_ait_kit, True)
@@ -769,10 +821,14 @@ while Game:
     ############PLAYER 1#####################
     hits_wall_player_1_bullet = pygame.sprite.spritecollide(bullet_player_1, walls, True)
     for hit_wall in hits_wall_player_1_bullet:
+        explosion = Explosion(hit_wall.rect.center, 'wall')
+        all_sprites.add(explosion)
         bullet_player_1.kill()
 
     hits_player_1_walls = pygame.sprite.spritecollide(player_1, walls, True)
     for hit_player in hits_player_1_walls:
+        explosion = Explosion(hit_player.rect.center, 'wall')
+        all_sprites.add(explosion)
         player_1.lives -= 1
 
     hits_super_power_player_1 = pygame.sprite.spritecollide(player_1, first_ait_kit, True)
