@@ -37,6 +37,7 @@ explosion_sound_tank = pygame.mixer.Sound(path.join(sound_dir, 'explosion_tank.o
 
 background_dir = path.join(path.dirname(__file__), 'Textures/Background')
 player_dir = path.join(path.dirname(__file__), 'Textures/Player')
+player_multiplayer_dir = path.join(path.dirname(__file__), 'Textures/Player_Multiplayer')
 enemy_dir = path.join(path.dirname(__file__), 'Textures/Enemy')
 effects_dir = path.join(path.dirname(__file__), 'Textures/Effects')
 explosions_dir = path.join(path.dirname(__file__), 'Textures/Explosions')
@@ -74,6 +75,7 @@ class PlayerTank(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.x = x
         self.rect.y = y
         self.speed = 2
@@ -83,19 +85,21 @@ class PlayerTank(pygame.sprite.Sprite):
         self.direction = Direction.RIGHT
         self.KEY = {d_right: Direction.RIGHT, d_left: Direction.LEFT,
                     d_up: Direction.UP, d_down: Direction.DOWN}
+        self.scores = 0
 
     def draw(self):
         if self.direction == Direction.RIGHT:
             self.image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
-
+            self.image.set_colorkey(BLACK)
         if self.direction == Direction.LEFT:
             self.image = pygame.image.load(path.join(player_dir, "player_2.png")).convert()
-
+            self.image.set_colorkey(BLACK)
         if self.direction == Direction.UP:
             self.image = pygame.image.load(path.join(player_dir, "player_1.png")).convert()
-
+            self.image.set_colorkey(BLACK)
         if self.direction == Direction.DOWN:
             self.image = pygame.image.load(path.join(player_dir, "player_4.png")).convert()
+            self.image.set_colorkey(BLACK)
 
     def change_direction(self, direction):
         self.direction = direction
@@ -122,11 +126,11 @@ class PlayerTank(pygame.sprite.Sprite):
             self.rect.y = HEIGHT - 25
 
     def power(self):
-        self.speed += 5
+        self.speed += 2
         self.speed_time = pygame.time.get_ticks()
 
     def update(self):
-        if self.speed >= 7 and pygame.time.get_ticks() - self.speed_time > POWER_UP_TIME:
+        if self.speed >= 4 and pygame.time.get_ticks() - self.speed_time > POWER_UP_TIME:
             self.speed = 2
 
 
@@ -138,16 +142,18 @@ class EnemyTank(pygame.sprite.Sprite):
         # Initialize player attributes, coordinates
         self.image = pygame.image.load(path.join(enemy_dir, "player_1.png")).convert()
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.x = x
         self.rect.y = y
         self.speed = 2
-        self.width = 25
+        self.width = 23
         self.lives = 3
         self.direction = Direction.LEFT
         self.last_shot = pygame.time.get_ticks()
         self.KEY = {d_right: Direction.RIGHT, d_left: Direction.LEFT,
                     d_up: Direction.UP, d_down: Direction.DOWN}
         self.speed_time = pygame.time.get_ticks()
+        self.scores = 0
 
     def change_direction(self, direction):
         self.direction = direction
@@ -155,15 +161,16 @@ class EnemyTank(pygame.sprite.Sprite):
     def draw(self):
         if self.direction == Direction.RIGHT:
             self.image = pygame.image.load(path.join(enemy_dir, "player_4.png")).convert()
-
+            self.image.set_colorkey(BLACK)
         if self.direction == Direction.LEFT:
             self.image = pygame.image.load(path.join(enemy_dir, "player_2.png")).convert()
-
+            self.image.set_colorkey(BLACK)
         if self.direction == Direction.UP:
             self.image = pygame.image.load(path.join(enemy_dir, "player_1.png")).convert()
-
+            self.image.set_colorkey(BLACK)
         if self.direction == Direction.DOWN:
             self.image = pygame.image.load(path.join(enemy_dir, "player_3.png")).convert()
+            self.image.set_colorkey(BLACK)
 
     def move(self):
         if self.direction == Direction.LEFT:
@@ -201,6 +208,7 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(path.join(effects_dir, "Shell_1.png")).convert()
         self.rect = self.image.get_rect()
+        self.image.set_colorkey(BLACK)
         self.rect.x = x
         self.rect.y = y
         self.speed = 3
@@ -218,21 +226,25 @@ class Bullet(pygame.sprite.Sprite):
         if Tank.direction == Direction.RIGHT:
             self.image = pygame.image.load(path.join(effects_dir, "Shell_4.png")).convert()
             self.rect = self.image.get_rect()
+            self.image.set_colorkey(BLACK)
             self.rect.x, self.rect.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
             self.dx, self.dy = 15, 0
         if Tank.direction == Direction.LEFT:
             self.image = pygame.image.load(path.join(effects_dir, "Shell_2.png")).convert()
             self.rect = self.image.get_rect()
+            self.image.set_colorkey(BLACK)
             self.rect.x, self.rect.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
             self.dx, self.dy = - 15, 0
         if Tank.direction == Direction.UP:
             self.image = pygame.image.load(path.join(effects_dir, "Shell_1.png")).convert()
             self.rect = self.image.get_rect()
+            self.image.set_colorkey(BLACK)
             self.rect.x, self.rect.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
             self.dx, self.dy = 0, -15
         if Tank.direction == Direction.DOWN:
             self.image = pygame.image.load(path.join(effects_dir, "Shell_3.png")).convert()
             self.rect = self.image.get_rect()
+            self.image.set_colorkey(BLACK)
             self.rect.x, self.rect.y = Tank.rect.x + int(Tank.width / 2), Tank.rect.y + int(Tank.width / 2)
             self.dx, self.dy = 0, 15
 
@@ -336,20 +348,32 @@ class Explosion(pygame.sprite.Sprite):
 
 def player_1_lives():
     font = pygame.font.SysFont("Arial", 25)
-    lives = font.render("Player 1: " + str(player_1.lives), True, RED)
+    lives = font.render("Player 1 lives: " + str(player_1.lives), True, WHITE)
     screen.blit(lives, (850, 20))
 
 
 def player_2_lives():
     font = pygame.font.SysFont("Arial", 25)
-    lives = font.render("Player 2: " + str(player_2.lives), True, RED)
+    lives = font.render("Player 2 lives: " + str(player_2.lives), True, WHITE)
     screen.blit(lives, (850, 40))
+
+
+def player_1_scores():
+    font = pygame.font.SysFont("Arial", 25)
+    scores = font.render("Player 1 scores:" + str(player_1.scores), True, WHITE)
+    screen.blit(scores, (100, 20))
+
+
+def player_2_scores():
+    font = pygame.font.SysFont("Arial", 25)
+    scores = font.render("Player 2 scores:" + str(player_2.scores), True, WHITE)
+    screen.blit(scores, (100, 40))
 
 
 def multiplayer():
 
-    WIDTH = 800
-    HEIGHT = 600
+    WIDTH = 1000
+    HEIGHT = 800
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Armored Kill')
     IP = '34.254.177.17'
@@ -403,8 +427,8 @@ def multiplayer():
 
         def call(self, key, message={}):
 
+            # message = {}
             # if message is None:
-            #     message = {}
             self.response = None
             self.corr_id = str(uuid.uuid4())
             self.channel.basic_publish(
@@ -486,8 +510,10 @@ def multiplayer():
             # self.rect = self.image.get_rect()
             # self.rect.x = x
             # self.rect.y = y
-            self.x = x
-            self.y = y
+            self.image = pygame.image.load(path.join(player_multiplayer_dir, "player_1.png")).convert()
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = y
             # self.speed = speed
             self.width = 31
             self.height = 31
@@ -512,9 +538,12 @@ def multiplayer():
             tank_c = (x + int(width / 2), y + int(width / 2))
             pygame.draw.rect(screen, (255, 255, 255), (x, y, width, height))
             pygame.draw.circle(screen, (255, 255, 255), tank_c, int(width / 2))
+            self.image = pygame.image.load(path.join(player_multiplayer_dir, "player_1.png")).convert()
+            # self.image = pygame.image.get_rect()
             if direction == UP:
                 # image = pygame.image.load(path.join(player_dir, "player_3.png")).convert()
                 pygame.draw.line(screen, (255, 255, 255), tank_c, (x + int(width / 2), y - int(width / 2)), 4)
+                screen.blit(self.image)
             if direction == DOWN:
                 pygame.draw.line(screen, (255, 255, 255), tank_c, (x + int(width / 2), y + width + int(width / 2)), 4)
             if direction == LEFT:
@@ -576,8 +605,8 @@ def multiplayer():
 
     player = TankConsumerClient('room-7', 200, 200)
     # tanks = [player]
-    # all_sprites = pygame.sprite.Group()
-    # all_sprites.add(player)
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(player)
 
     def game_start():
         mainloop = True
@@ -586,8 +615,8 @@ def multiplayer():
         while mainloop:
             # player = TankConsumerClient('room-7', 200, 200)
             # tanks = [player]
-            # all_sprites = pygame.sprite.Group()
-            # all_sprites.add(player)
+            all_sprites = pygame.sprite.Group()
+            all_sprites.add(player)
             pos = pygame.mouse.get_pos()
             # print(pos)
             screen.fill((0, 0, 0))
@@ -611,8 +640,8 @@ def multiplayer():
                     if button.x <= pos[0] <= button.x + button.width and button.y <= pos[1] <= button.y + button.height:
                         button.func()
             button.draw()
-            # all_sprites.update()
-            # all_sprites.draw(screen)
+            all_sprites.update()
+            all_sprites.draw(screen)
             try:
                 remaining_time = event_client.response['remainingTime']
                 # health_server = event_client.response['health']
@@ -659,7 +688,7 @@ def multiplayer():
                     draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
             except:
                 pass
-            # all_sprites.draw(screen)
+            all_sprites.draw(screen)
             pygame.display.flip()
         client.connection.close()
         pygame.quit()
@@ -783,12 +812,14 @@ while Game:
                 bullet.drop = False
 
     if bullet_player_1.collision(player_2):
+        player_1.scores += 1
         explosion = Explosion(player_2.rect.center, 'large')
         all_sprites.add(explosion)
         explosion_sound_tank.play()
         player_2.lives -= 1
         bullet_player_1.drop = False
     if bullet_player_2.collision(player_1):
+        player_2.scores += 1
         explosion = Explosion(player_1.rect.center, 'large')
         all_sprites.add(explosion)
         explosion_sound_tank.play()
@@ -852,9 +883,14 @@ while Game:
 
     bullet_player_1.fire()
     bullet_player_2.fire()
+
+    screen.fill(BLACK)
+    screen.blit(background, background_rect)
     player_1_lives()
     player_2_lives()
-
+    player_1_scores()
+    player_2_scores()
+    all_sprites.draw(screen)
     pygame.display.flip()
 
 pygame.quit()
