@@ -596,7 +596,8 @@ def multiplayer():
         screen.blit(background, background_rect)
         render(screen, "Do you want to restart the game?", 48, WIDTH / 2, HEIGHT / 4)
         render(screen, "For Quit press 1. For MultiPlayer press R. For MultiPlayer with AI press 2.", 25, WIDTH / 2,
-               HEIGHT / 1.5)
+                   HEIGHT / 1.5)
+
         pygame.display.flip()
         menu = True
         while menu:
@@ -612,6 +613,64 @@ def multiplayer():
                 if pressed[pygame.K_3]:
                     multiplayer_ai()
 
+    def kicked():
+        my_im = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/k.png')
+        my_im_rect = my_im.get_rect()
+        screen.blit(my_im, my_im_rect)
+        # render(screen, "You was kicked. Do you want to restart the game?", 48, WIDTH / 2, HEIGHT / 4)
+        # render(screen, "For Quit press 1. For MultiPlayer press R. For MultiPlayer with AI press 2.", 25, WIDTH / 2,
+        #        HEIGHT / 1.5)
+
+    def lose():
+        screen.blit(background, background_rect)
+        render(screen, "YOU LOSE. Do you want to restart the game?", 48, WIDTH / 2, HEIGHT / 4)
+        render(screen, "For Quit press 1. For MultiPlayer press R. For MultiPlayer with AI press 2.", 25, WIDTH / 2,
+               HEIGHT / 1.5)
+
+        pygame.display.flip()
+        menu = True
+        while menu:
+            clock.tick(FPS)
+            for key in pygame.event.get():
+                if key.type == pygame.QUIT:
+                    pygame.quit()
+                pressed = pygame.key.get_pressed()
+                if pressed[pygame.K_1]:
+                    pygame.quit()
+                if pressed[pygame.K_r]:
+                    multiplayer()
+                if pressed[pygame.K_3]:
+                    multiplayer_ai()
+        # my_im = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/k.png')
+        # my_im_rect = my_im.get_rect()
+        # screen.blit(my_im, my_im_rect)
+        # render(screen, "You was kicked. Do you want to restart the game?", 48, WIDTH / 2, HEIGHT / 4)
+        # render(screen, "For Quit press 1. For MultiPlayer press R. For MultiPlayer with AI press 2.", 25, WIDTH / 2,
+        #        HEIGHT / 1.5)
+
+    def win():
+        my_im = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/k.png')
+        my_im_rect = my_im.get_rect()
+        screen.blit(my_im, my_im_rect)
+            # render(screen, "You was kicked. Do you want to restart the game?", 48, WIDTH / 2, HEIGHT / 4)
+            # render(screen, "For Quit press 1. For MultiPlayer press R. For MultiPlayer with AI press 2.", 25, WIDTH / 2,
+            #        HEIGHT / 1.5)
+
+
+        pygame.display.flip()
+        menu = True
+        while menu:
+            clock.tick(FPS)
+            for key in pygame.event.get():
+                if key.type == pygame.QUIT:
+                    pygame.quit()
+                pressed = pygame.key.get_pressed()
+                if pressed[pygame.K_1]:
+                    pygame.quit()
+                if pressed[pygame.K_r]:
+                    multiplayer()
+                if pressed[pygame.K_3]:
+                    multiplayer_ai()
 
     # def afk():
     #     start_menu()
@@ -657,7 +716,7 @@ def multiplayer():
                 #     restart()
                 # if event.type == pygame.KEYUP:
                 #     start_ticks = 0
-                print(seconds)
+                # print(seconds)
                 if event.type == pygame.QUIT:
                     mainloop = False
                     event_client.daemon = True
@@ -683,7 +742,7 @@ def multiplayer():
             try:
                 hits = event_client.response['hits']
                 bullets = event_client.response['gameField']['bullets']
-                winner = event_client.response['winners']
+                # winner = event_client.response['winners']
                 tanks = event_client.response['gameField']['tanks']
 
                 i = 30
@@ -745,10 +804,7 @@ def multiplayer():
                     textRect.center = (850, 100)
                     screen.blit(text, textRect)
 
-                    text = font.render('Winners: {}'.format(winner), True, RED)
-                    textRect = text.get_rect()
-                    textRect.center = (500, 400)
-                    screen.blit(text, textRect)
+
 
                     if tank['id'] == client.tank_id:
                         text = font.render('ID: {}'.format(client.tank_id), True, WHITE)
@@ -786,10 +842,6 @@ def multiplayer():
                         screen.blit(text, textRect)
 
 
-                # It's terrible because of stupidity of server.
-                # if tank['health'] == 2:
-                #     explosion_sound_tank.play()
-                #     pygame.mixer.Sound.set_volume(0)
 
                 for bullet in bullets:
                     if client.tank_id:
@@ -801,8 +853,48 @@ def multiplayer():
                         draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
                     if client.tank_id != tank['id']:
                         draw_enemy_bullet(**bullet)
+
             except:
                 pass
+
+            winners = event_client.response['winners']
+            kicks = event_client.response['kicked']
+            losers = event_client.response['losers']
+
+            if winners:
+                for winner in winners:
+                    my_id = client.tank_id
+                    if winner['tankId'] == my_id:
+                        # text = font.render('Your Scores: {}'.format(winner['score']), True, BLACK)
+                        # textRect = text.get_rect()
+                        # textRect.center = (850, 350)
+                        # screen.blit(text, textRect)
+                        restart()
+
+            elif losers:
+                for loser in losers:
+                    my_id = client.tank_id
+                    if loser['tankId'] == my_id:
+                        # my_im = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/k.png')
+                        # my_im_rect = my_im.get_rect()
+                        # screen.blit(my_im, my_im_rect)
+                        # textRect = text.get_rect()
+                        # textRect.center = (850, 350)
+                        # screen.blit(text, textRect)
+                        lose()
+
+            elif kicks:
+                for kick in kicks:
+                    my_id = client.tank_id
+                    if kick['tankId'] == my_id:
+                        # my_im = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/k.png')
+                        # screen.blit(screen, my_im)
+                        # text = font.render('You was kicked.', True, BLACK)
+                        # textRect = text.get_rect()
+                        # textRect.center = (850, 350)
+                        # screen.blit(text, textRect)
+                        kicked()
+
 
             pygame.display.flip()
         client.connection.close()
@@ -1058,7 +1150,7 @@ def multiplayer_ai():
         pygame.draw.circle(screen, (255, 0, 0), tank_c, int(width / 2))
 
 
-    player = TankConsumerClient('room-7')
+    # player = TankConsumerClient('room-7')
     start_ticks = pygame.time.get_ticks()
 
     def game_start():
@@ -1093,7 +1185,6 @@ def multiplayer_ai():
             try:
                 hits = event_client.response['hits']
                 bullets = event_client.response['gameField']['bullets']
-                winner = event_client.response['winners']
                 tanks = event_client.response['gameField']['tanks']
 
                 i = 30
@@ -1128,11 +1219,6 @@ def multiplayer_ai():
                     text = font.render('Remaining Time: {}'.format(remaining_time), True, WHITE)
                     textRect = text.get_rect()
                     textRect.center = (850, 100)
-                    screen.blit(text, textRect)
-
-                    text = font.render('Winners: {}'.format(winner), True, RED)
-                    textRect = text.get_rect()
-                    textRect.center = (500, 400)
                     screen.blit(text, textRect)
 
                     if tank['id'] == client.tank_id:
@@ -1180,6 +1266,7 @@ def multiplayer_ai():
                         draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
                     if client.tank_id != tank['id']:
                         draw_enemy_bullet(**bullet)
+
             except:
                 pass
 
