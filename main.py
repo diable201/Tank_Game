@@ -382,6 +382,13 @@ def multiplayer():
     USERNAME = 'dar-tanks'
     PASSWORD = '5orPLExUYnyVYZg48caMpX'
 
+    sound_dir = path.join(path.dirname(__file__), 'Sound')
+    pygame.mixer.init()
+
+    pygame.mixer.music.load(path.join(sound_dir, 'ost.ogg'))
+    pygame.mixer.music.play(-1)  # for loop
+
+
 
     class TankRpcClient:
 
@@ -506,7 +513,6 @@ def multiplayer():
             )
             self.response = None
 
-
         def on_response(self, ch, method, props, body):
             self.response = json.loads(body)
             print(self.response)
@@ -602,6 +608,8 @@ def multiplayer():
                         client.turn_tank(client.token, MOVE_KEYS[event.key])
                     if event.key == pygame.K_SPACE:
                         client.fire_tank(client.token)
+                        shoot_sound_player.play()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if button.x <= pos[0] <= button.x + button.width and button.y <= pos[1] <= button.y + button.height:
                         button.func()
@@ -649,6 +657,10 @@ def multiplayer():
                 textRect = text.get_rect()
                 textRect.center = (850, 300)
                 screen.blit(text, textRect)
+                # It's terrible because of stupidity of server.
+                # if tank['health'] == 2:
+                #     explosion_sound_tank.play()
+                #     pygame.mixer.Sound.set_volume(0)
 
                 for bullet in bullets:
                     bullet_x = bullet['x']
