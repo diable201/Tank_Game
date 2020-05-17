@@ -521,7 +521,454 @@ def multiplayer():
             self.channel.stop_consuming()
 
         def draw_tank(self, x, y, direction, **kwargs):
-            # print(**kwargs)
+
+            if direction == UP:
+                tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_1.png')
+                screen.blit(tank_image, (x, y))
+
+            if direction == DOWN:
+                tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_3.png')
+                screen.blit(tank_image, (x, y))
+
+            if direction == LEFT:
+                tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2.png')
+                screen.blit(tank_image, (x, y))
+
+            if direction == RIGHT:
+                tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_4.png')
+                screen.blit(tank_image, (x, y))
+
+
+
+
+    UP = 'UP'
+    DOWN = 'DOWN'
+    LEFT = 'LEFT'
+    RIGHT = 'RIGHT'
+
+    MOVE_KEYS = {
+        pygame.K_w: UP,
+        pygame.K_a: LEFT,
+        pygame.K_s: DOWN,
+        pygame.K_d: RIGHT
+    }
+
+    def draw_tank(x, y, direction, **kwargs):
+
+        if direction == UP:
+            tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_1.png')
+            screen.blit(tank_image, (x, y))
+
+        if direction == DOWN:
+            tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_3.png')
+            screen.blit(tank_image, (x, y))
+
+        if direction == LEFT:
+            tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_2.png')
+            screen.blit(tank_image, (x, y))
+
+        if direction == RIGHT:
+            tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_4.png')
+            screen.blit(tank_image, (x, y))
+
+    def draw_bullet(x, y, width, height, direction):
+
+        if direction == RIGHT or direction == LEFT:
+            my_im = pygame.transform.scale(
+                pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_1.png'), (15, 5))
+            screen.blit(my_im, (x, y))
+        if direction == UP or direction == DOWN:
+            my_im = pygame.transform.scale(
+                pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_2.png'), (5, 15))
+            screen.blit(my_im, (x, y))
+
+    def draw_enemy_bullet(x, y, width, height, direction):
+        if direction == RIGHT or direction == LEFT:
+            my_im = pygame.transform.scale(
+                pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_3.png'), (15, 5))
+            screen.blit(my_im, (x, y))
+        if direction == UP or direction == DOWN:
+            my_im = pygame.transform.scale(
+                pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_4.png'), (5, 15))
+            screen.blit(my_im, (x, y))
+
+    def restart():
+        screen.blit(background, background_rect)
+        render(screen, "Do you want to restart the game?", 48, WIDTH / 2, HEIGHT / 4)
+        render(screen, "For Quit press 1. For MultiPlayer press R. For MultiPlayer with AI press 2.", 25, WIDTH / 2,
+               HEIGHT / 1.5)
+        pygame.display.flip()
+        menu = True
+        while menu:
+            clock.tick(FPS)
+            for key in pygame.event.get():
+                if key.type == pygame.QUIT:
+                    pygame.quit()
+                pressed = pygame.key.get_pressed()
+                if pressed[pygame.K_1]:
+                    pygame.quit()
+                if pressed[pygame.K_r]:
+                    multiplayer()
+                if pressed[pygame.K_3]:
+                    multiplayer_ai()
+
+
+    # def afk():
+    #     start_menu()
+
+    # class Button:
+    #
+    #     def __init__(self, x, y, width, height, func):
+    #         self.x = x
+    #         self.y = y
+    #         self.width = width
+    #         self.height = height
+    #         self.func = func
+    #
+    #     def draw(self):
+    #         font = pygame.font.Font('freesansbold.ttf', 32)
+    #         text = font.render('click', True, (255, 255, 0))
+    #         textRect = text.get_rect()
+    #         textRect.center = (100, 100)
+    #         screen.blit(text, textRect)
+
+    # def click_button():
+    #     print('ok good')
+
+    player = TankConsumerClient('room-7')
+    start_ticks = pygame.time.get_ticks()
+
+    def game_start():
+        mainloop = True
+        font = pygame.font.Font('freesansbold.ttf', 16)
+        # button = Button(100, 100, 100, 100, click_button())
+        while mainloop:
+
+            # print(seconds)  # print how many seconds
+            # afk()
+            # pos = pygame.mouse.get_pos()
+            # print(pos)
+            screen.fill(BLACK)
+            screen.blit(background, background_rect)
+            for event in pygame.event.get():
+                clock.tick(FPS)
+                # seconds = (pygame.time.get_ticks() - start_ticks) / 1000  # calculate how many seconds
+                # if seconds >= 30:  # if more than 30 seconds close the game
+                #     restart()
+                # if event.type == pygame.KEYUP:
+                #     start_ticks = 0
+                print(seconds)
+                if event.type == pygame.QUIT:
+                    mainloop = False
+                    event_client.daemon = True
+                    pygame.quit()
+                    client.connection.close()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        mainloop = False
+                        pygame.quit()
+                        client.connection.close()
+                    if event.key in MOVE_KEYS:
+
+                        client.turn_tank(client.token, MOVE_KEYS[event.key])
+
+                    if event.key == pygame.K_SPACE:
+                        client.fire_tank(client.token)
+                        shoot_sound_player.play()
+
+                # if event.type == pygame.MOUSEBUTTONDOWN:
+                #     if button.x <= pos[0] <= button.x + button.width and button.y <= pos[1] <= button.y + button.height:
+                #         button.func()
+            # button.draw()
+            try:
+                hits = event_client.response['hits']
+                bullets = event_client.response['gameField']['bullets']
+                winner = event_client.response['winners']
+                tanks = event_client.response['gameField']['tanks']
+
+                i = 30
+                pygame.draw.rect(screen, (130, 16, 200), (5, 5, 270, 40 * len(tanks)), 7)
+                scores = {tank['id']: [tank['score'], tank['health']] for tank in tanks}
+                sorted_scores = reversed(sorted(scores.items(), key=lambda kv: kv[1]))
+                for score in sorted_scores:
+                    if score[0] == client.tank_id:
+                        color = (200, 200, 0)
+                    else:
+                        color = (100, 100, 100)
+                    text = font.render(str(score[0]) + ': Score=>' + str(score[1][0]) + 'HP=>' + str(score[1][1]), True, color)
+                    textRect = text.get_rect()
+                    textRect.center = (143, i)
+                    screen.blit(text, textRect)
+                    i += 35
+                for tank in tanks:
+                    if client.tank_id == tank['id']:
+                        player.draw_tank(**tank)
+                    else:
+                        draw_tank(**tank)
+                    # tank_x = tank['x']
+                    # tank_y = tank['y']
+                    # tank_width = tank['width']
+                    # tank_height = tank['height']
+                    # tank_direction = tank['direction']
+                    # ai(tank_x, tank_y, tank_width, tank_height, tank_direction)
+
+                    tanks_dict = {
+                        "id": tank['id'],
+                        "score": tank['score'],
+                        "health": tank['health']
+                    }
+                    # for i in sorted(tanks_dict):
+                    #     if tank['id'] == client.tank_id:
+                    #         score = (tank['score'])
+                    #         text = font.render('Scores: {}'.format(score), True, GREEN)
+                    #         textRect = text.get_rect()
+                    #         textRect.center = (550, 500)
+                    #         screen.blit(text, textRect)
+                    #         pygame.display.flip()
+                    #     if tank['id'] != client.tank_id:
+                    #         score = (tank['score'])
+                    #         text = font.render('Not My Scores: {}'.format(score), True, RED)
+                    #         textRect = text.get_rect()
+                    #         textRect.center = (550, 550)
+                    #         screen.blit(text, textRect)
+                    #         pygame.display.flip()
+                    #     print(tanks_dict)
+                    remaining_time = event_client.response['remainingTime']
+                    # kicked = event_client.response['kicked']
+                    # text = font.render('Kicked: {}'.format(kicked), True, WHITE)
+                    # textRect = text.get_rect()
+                    # textRect.center = (900, 500)
+                    # screen.blit(text, textRect)
+
+                    text = font.render('Remaining Time: {}'.format(remaining_time), True, WHITE)
+                    textRect = text.get_rect()
+                    textRect.center = (850, 100)
+                    screen.blit(text, textRect)
+
+                    text = font.render('Winners: {}'.format(winner), True, RED)
+                    textRect = text.get_rect()
+                    textRect.center = (500, 400)
+                    screen.blit(text, textRect)
+
+                    if tank['id'] == client.tank_id:
+                        text = font.render('ID: {}'.format(client.tank_id), True, WHITE)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 150)
+                        screen.blit(text, textRect)
+                    else:
+                        text = font.render('Not My ID: {}'.format(tank['id']), True, BLACK)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 300)
+                        screen.blit(text, textRect)
+                    if tank['id'] == client.tank_id:
+                        my_score = tank['score']
+                        text = font.render('My Scores: {}'.format(my_score), True, WHITE)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 200)
+                        screen.blit(text, textRect)
+                    else:
+                        not_my_score = tank['score']
+                        text = font.render('Not My Scores: {}'.format(not_my_score), True, BLACK)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 350)
+                        screen.blit(text, textRect)
+                    if tank['id'] == client.tank_id:
+                        my_health = tank['health']
+                        text = font.render('My Lives: {}'.format(my_health), True, WHITE)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 250)
+                        screen.blit(text, textRect)
+                    else:
+                        not_my_health = tank['health']
+                        text = font.render('Not my Lives: {}'.format(not_my_health), True, BLACK)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 400)
+                        screen.blit(text, textRect)
+
+
+                # It's terrible because of stupidity of server.
+                # if tank['health'] == 2:
+                #     explosion_sound_tank.play()
+                #     pygame.mixer.Sound.set_volume(0)
+
+                for bullet in bullets:
+                    if client.tank_id:
+                        bullet_x = bullet['x']
+                        bullet_y = bullet['y']
+                        bullet_width = bullet['width']
+                        bullet_height = bullet['height']
+                        bullet_direction = bullet['direction']
+                        draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
+                    if client.tank_id != tank['id']:
+                        draw_enemy_bullet(**bullet)
+            except:
+                pass
+
+            pygame.display.flip()
+        client.connection.close()
+        pygame.quit()
+
+    client = TankRpcClient()
+    client.check_server_status()
+    client.obtain_token('room-9')
+
+    event_client = TankConsumerClient('room-9')
+    event_client.start()
+    game_start()
+
+
+def multiplayer_ai():
+    WIDTH = 1000
+    HEIGHT = 800
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('Armored Kill')
+    IP = '34.254.177.17'
+    PORT = 5672
+    VIRTUAL_HOST = 'dar-tanks'
+    USERNAME = 'dar-tanks'
+    PASSWORD = '5orPLExUYnyVYZg48caMpX'
+
+    sound_dir = path.join(path.dirname(__file__), 'Sound')
+    pygame.mixer.init()
+
+    pygame.mixer.music.load(path.join(sound_dir, 'ost.ogg'))
+    pygame.mixer.music.play(-1)  # for loop
+
+    class TankRpcClient:
+
+        def __init__(self):
+            self.connection = pika.BlockingConnection(
+                pika.ConnectionParameters(
+                    host=IP,
+                    port=PORT,
+                    virtual_host=VIRTUAL_HOST,
+                    credentials=pika.PlainCredentials(
+                        username=USERNAME,
+                        password=PASSWORD
+                    )
+                )
+            )
+            self.channel = self.connection.channel()
+            queue = self.channel.queue_declare(queue='',
+                                               auto_delete=True,
+                                               exclusive=True
+                                               )
+            self.callback_queue = queue.method.queue
+            self.channel.queue_bind(
+                exchange='X:routing.topic',
+                queue=self.callback_queue
+            )
+
+            self.channel.basic_consume(
+                queue=self.callback_queue,
+                on_message_callback=self.on_response,
+                auto_ack=True
+            )
+
+            self.response = None
+            self.corr_id = None
+            self.token = None
+            self.tank_id = None
+            self.room_id = None
+
+        def on_response(self, ch, method, props, body):
+            if self.corr_id == props.correlation_id:
+                self.response = json.loads(body)
+                print(self.response)
+
+        def call(self, key, message={}):
+
+            # message = {}
+            # if message is None:
+            self.response = None
+            self.corr_id = str(uuid.uuid4())
+            self.channel.basic_publish(
+                exchange='X:routing.topic',
+                routing_key=key,
+                properties=pika.BasicProperties(
+                    reply_to=self.callback_queue,
+                    correlation_id=self.corr_id,
+                ),
+                body=json.dumps(message)
+            )
+            while self.response is None:
+                self.connection.process_data_events()
+
+        def check_server_status(self):
+            self.call('tank.request.healthcheck')
+            return self.response['status'] == '200'
+
+        def obtain_token(self, room_id):
+            message = {
+                'roomId': room_id
+            }
+            self.call('tank.request.register', message)
+            if 'token' in self.response:
+                self.token = self.response['token']
+                self.tank_id = self.response['tankId']
+                self.room_id = self.response['roomId']
+
+                return True
+            return False
+
+        def turn_tank(self, token, direction):
+            message = {
+                'token': token,
+                'direction': direction
+            }
+            self.call('tank.request.turn', message)
+
+        def fire_tank(self, token):
+            message = {
+                'token': token
+            }
+            self.call('tank.request.fire', message)
+
+    class TankConsumerClient(Thread, pygame.sprite.Sprite):
+
+        def __init__(self, room_id):
+            super().__init__()
+            pygame.sprite.Sprite.__init__(self)
+            self.connection = pika.BlockingConnection(
+                pika.ConnectionParameters(
+                    host=IP,
+                    port=PORT,
+                    virtual_host=VIRTUAL_HOST,
+                    credentials=pika.PlainCredentials(
+                        username=USERNAME,
+                        password=PASSWORD
+                    )
+                )
+            )
+            self.channel = self.connection.channel()
+            queue = self.channel.queue_declare(queue='',
+                                               auto_delete=True,
+                                               exclusive=True
+                                               )
+            event_listener = queue.method.queue
+            self.channel.queue_bind(exchange='X:routing.topic',
+                                    queue=event_listener,
+                                    routing_key='event.state.' + room_id)
+
+            self.channel.basic_consume(
+                queue=event_listener,
+                on_message_callback=self.on_response,
+                auto_ack=True
+            )
+            self.response = None
+
+        def on_response(self, ch, method, props, body):
+            self.response = json.loads(body)
+            print(self.response)
+
+        def run(self):
+            self.channel.start_consuming()
+
+        def stop(self):
+            self.channel.stop_consuming()
+
+        def draw_tank(self, x, y, direction, **kwargs):
+
             if direction == UP:
                 tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_1.png')
                 screen.blit(tank_image, (x, y))
@@ -551,7 +998,7 @@ def multiplayer():
     }
 
     def draw_tank(x, y, direction, **kwargs):
-        # print(**kwargs)
+
         if direction == UP:
             tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_1.png')
             screen.blit(tank_image, (x, y))
@@ -568,8 +1015,8 @@ def multiplayer():
             tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_4.png')
             screen.blit(tank_image, (x, y))
 
-
     def draw_bullet(x, y, width, height, direction):
+
         if direction == RIGHT or direction == LEFT:
             my_im = pygame.transform.scale(
                 pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_1.png'), (15, 5))
@@ -579,17 +1026,28 @@ def multiplayer():
                 pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_2.png'), (5, 15))
             screen.blit(my_im, (x, y))
 
+    def draw_enemy_bullet(x, y, width, height, direction):
+        if direction == RIGHT or direction == LEFT:
+            my_im = pygame.transform.scale(
+                pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_3.png'), (15, 5))
+            screen.blit(my_im, (x, y))
+        if direction == UP or direction == DOWN:
+            my_im = pygame.transform.scale(
+                pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_4.png'), (5, 15))
+            screen.blit(my_im, (x, y))
+
+
     def ai(x, y, width, height, direction, **kwargs):
         # print(**kwargs)
         if x <= 750:
             client.turn_tank(client.token, RIGHT)
             client.fire_tank(client.token)
-        elif x > 750:
-            client.turn_tank(client.token, DOWN)
-            client.fire_tank(client.token)
-        elif x > 750 and y > 50:
-            client.turn_tank(client.token, UP)
-            client.fire_tank(client.token)
+        # elif x > 750:
+        #     client.turn_tank(client.token, DOWN)
+        #     client.fire_tank(client.token)
+        # elif x > 750 and y > 50:
+        #     client.turn_tank(client.token, UP)
+        #     client.fire_tank(client.token)
         # elif x > 600:
         #     client.turn_tank(client.token, DOWN)
         # elif x == 600:
@@ -599,27 +1057,6 @@ def multiplayer():
                          (x, y, width, width), 2)
         pygame.draw.circle(screen, (255, 0, 0), tank_c, int(width / 2))
 
-    # def afk():
-    #     start_menu()
-
-    class Button:
-
-        def __init__(self, x, y, width, height, func):
-            self.x = x
-            self.y = y
-            self.width = width
-            self.height = height
-            self.func = func
-
-        def draw(self):
-            font = pygame.font.Font('freesansbold.ttf', 32)
-            text = font.render('click', True, (255, 255, 0))
-            textRect = text.get_rect()
-            textRect.center = (100, 100)
-            screen.blit(text, textRect)
-
-    def click_button():
-        print('ok good')
 
     player = TankConsumerClient('room-7')
     start_ticks = pygame.time.get_ticks()
@@ -627,23 +1064,14 @@ def multiplayer():
     def game_start():
         mainloop = True
         font = pygame.font.Font('freesansbold.ttf', 16)
-        button = Button(100, 100, 100, 100, click_button())
+
         while mainloop:
 
-            # print(seconds)  # print how many seconds
-            # afk()
-            pos = pygame.mouse.get_pos()
-            # print(pos)
             screen.fill(BLACK)
             screen.blit(background, background_rect)
             for event in pygame.event.get():
                 clock.tick(FPS)
                 seconds = (pygame.time.get_ticks() - start_ticks) / 1000  # calculate how many seconds
-                # if seconds >= 30:  # if more than 30 seconds close the game
-                #     start_menu()
-                # if event.type == pygame.KEYUP:
-                #     start_ticks = 0
-                # print(seconds)
                 if event.type == pygame.QUIT:
                     mainloop = False
                     event_client.daemon = True
@@ -655,91 +1083,103 @@ def multiplayer():
                         pygame.quit()
                         client.connection.close()
                     if event.key in MOVE_KEYS:
-                        # start_ticks = 0
+
                         client.turn_tank(client.token, MOVE_KEYS[event.key])
 
                     if event.key == pygame.K_SPACE:
                         client.fire_tank(client.token)
                         shoot_sound_player.play()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if button.x <= pos[0] <= button.x + button.width and button.y <= pos[1] <= button.y + button.height:
-                        button.func()
-            button.draw()
             try:
                 hits = event_client.response['hits']
                 bullets = event_client.response['gameField']['bullets']
                 winner = event_client.response['winners']
                 tanks = event_client.response['gameField']['tanks']
 
-                for tank in tanks:
-                    if client.tank_id == tank['id']:
-                        player.draw_tank(**tank)
+                i = 30
+                pygame.draw.rect(screen, (130, 16, 200), (5, 5, 270, 40 * len(tanks)), 7)
+                scores = {tank['id']: [tank['score'], tank['health']] for tank in tanks}
+                sorted_scores = reversed(sorted(scores.items(), key=lambda kv: kv[1]))
+                for score in sorted_scores:
+                    if score[0] == client.tank_id:
+                        color = (200, 200, 0)
                     else:
-                        draw_tank(**tank)
+                        color = (100, 100, 100)
+                    text = font.render(str(score[0]) + ': Score=>' + str(score[1][0]) + 'HP=>' + str(score[1][1]), True, color)
+                    textRect = text.get_rect()
+                    textRect.center = (143, i)
+                    screen.blit(text, textRect)
+                    i += 35
+                for tank in tanks:
+
+                    ai(**tank)
+                    # else:
+                    #     draw_tank(**tank)
                     # tank_x = tank['x']
                     # tank_y = tank['y']
                     # tank_width = tank['width']
                     # tank_height = tank['height']
                     # tank_direction = tank['direction']
                     # ai(tank_x, tank_y, tank_width, tank_height, tank_direction)
-                tanks_dict_2 = {
-                    "id": tank['id'],
-                    "score": tank['score'],
-                    "health": tank['health']
-                }
-
-                remaining_time = event_client.response['remainingTime']
-                kicked = event_client.response['kicked']
-                text = font.render('Kicked: {}'.format(kicked), True, WHITE)
-                textRect = text.get_rect()
-                textRect.center = (900, 500)
-                screen.blit(text, textRect)
-                # health_server = event_client.response['health']
-                text = font.render('Remaining Time: {}'.format(remaining_time), True, WHITE)
-                textRect = text.get_rect()
-                textRect.center = (850, 100)
-                screen.blit(text, textRect)
 
 
-                my_id = client.tank_id
-                text = font.render('ID: {}'.format(my_id), True, WHITE)
-                textRect = text.get_rect()
-                textRect.center = (850, 150)
-                screen.blit(text, textRect)
+                    remaining_time = event_client.response['remainingTime']
 
-                text = font.render('Not My ID: {}'.format(tank['id']), True, BLACK)
-                textRect = text.get_rect()
-                textRect.center = (850, 500)
-                screen.blit(text, textRect)
+                    text = font.render('Remaining Time: {}'.format(remaining_time), True, WHITE)
+                    textRect = text.get_rect()
+                    textRect.center = (850, 100)
+                    screen.blit(text, textRect)
 
-                my_score = tank['score']
-                text = font.render('My Scores: ' + str(my_score), True, WHITE)
-                textRect = text.get_rect()
-                textRect.center = (850, 200)
-                screen.blit(text, textRect)
+                    text = font.render('Winners: {}'.format(winner), True, RED)
+                    textRect = text.get_rect()
+                    textRect.center = (500, 400)
+                    screen.blit(text, textRect)
 
-                text = font.render('Not My Scores: {}'.format(tank['score']), True, BLACK)
-                textRect = text.get_rect()
-                textRect.center = (850, 250)
-                screen.blit(text, textRect)
-
-                text = font.render('Lives: {}'.format(tank['health']), True, BLACK)
-                textRect = text.get_rect()
-                textRect.center = (850, 300)
-                screen.blit(text, textRect)
-                # It's terrible because of stupidity of server.
-                # if tank['health'] == 2:
-                #     explosion_sound_tank.play()
-                #     pygame.mixer.Sound.set_volume(0)
+                    if tank['id'] == client.tank_id:
+                        text = font.render('ID: {}'.format(client.tank_id), True, WHITE)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 150)
+                        screen.blit(text, textRect)
+                    else:
+                        text = font.render('Not My ID: {}'.format(tank['id']), True, BLACK)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 300)
+                        screen.blit(text, textRect)
+                    if tank['id'] == client.tank_id:
+                        my_score = tank['score']
+                        text = font.render('My Scores: {}'.format(my_score), True, WHITE)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 200)
+                        screen.blit(text, textRect)
+                    else:
+                        not_my_score = tank['score']
+                        text = font.render('Not My Scores: {}'.format(not_my_score), True, BLACK)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 350)
+                        screen.blit(text, textRect)
+                    if tank['id'] == client.tank_id:
+                        my_health = tank['health']
+                        text = font.render('My Lives: {}'.format(my_health), True, WHITE)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 250)
+                        screen.blit(text, textRect)
+                    else:
+                        not_my_health = tank['health']
+                        text = font.render('Not my Lives: {}'.format(not_my_health), True, BLACK)
+                        textRect = text.get_rect()
+                        textRect.center = (850, 400)
+                        screen.blit(text, textRect)
 
                 for bullet in bullets:
-                    bullet_x = bullet['x']
-                    bullet_y = bullet['y']
-                    bullet_width = bullet['width']
-                    bullet_height = bullet['height']
-                    bullet_direction = bullet['direction']
-                    draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
+                    if client.tank_id:
+                        bullet_x = bullet['x']
+                        bullet_y = bullet['y']
+                        bullet_width = bullet['width']
+                        bullet_height = bullet['height']
+                        bullet_direction = bullet['direction']
+                        draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
+                    if client.tank_id != tank['id']:
+                        draw_enemy_bullet(**bullet)
             except:
                 pass
 
@@ -760,7 +1200,7 @@ def start_menu():
     screen.blit(background, background_rect)
     render(screen, "Welcome to Armored Kill", 48, WIDTH / 2, HEIGHT / 4)
     render(screen, "Arrow WASD/arrows to move. Hold Enter/Space to fire", 25, WIDTH / 2, HEIGHT / 1.5)
-    render(screen, "For SinglePlayer press 1. For MultiPlayer press 2", 22, WIDTH / 2, HEIGHT * 3 / 4)
+    render(screen, "For SinglePlayer press 1. For MultiPlayer press 2. For MultiPlayer with AI press 3.", 22, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.flip()
     menu = True
     while menu:
@@ -773,6 +1213,8 @@ def start_menu():
                 menu = False
             if pressed[pygame.K_2]:
                 multiplayer()
+            if pressed[pygame.K_3]:
+                multiplayer_ai()
 
 
 def end_menu():
@@ -875,6 +1317,7 @@ while Game:
         explosion_sound_tank.play()
         player_1.lives -= 1
         bullet_player_2.drop = False
+
     if random.randrange(0, 100) < 0.1:  # 1 % probability
         health_boost = SuperPowerKit(random.randint(50, WIDTH - 50), random.randint(50, HEIGHT - 50))
         all_sprites.add(health_boost)
