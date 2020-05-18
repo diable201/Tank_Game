@@ -146,7 +146,7 @@ class EnemyTank(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.speed = 2
-        self.width = 23
+        self.width = 25
         self.lives = 3
         self.direction = Direction.LEFT
         self.last_shot = pygame.time.get_ticks()
@@ -278,6 +278,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def power(self, Tank):
         shoot_sound_enemy.play()
+        self.speed = 5
         if Tank.direction == Direction.RIGHT:
             self.image = pygame.image.load(path.join(effects_dir, "Shell_4.png")).convert()
             self.rect = self.image.get_rect()
@@ -304,7 +305,6 @@ class Bullet(pygame.sprite.Sprite):
             self.dx, self.dy = 0, 30
 
     def update(self):
-        self.speed = 5
         if self.speed >= 8 and pygame.time.get_ticks() - self.speed_time > POWER_UP_TIME:
             self.speed = 3
 
@@ -613,7 +613,6 @@ def multiplayer():
             screen.blit(my_im, (x, y))
 
     player = TankConsumerClient('room-7')
-    # start_ticks = pygame.time.get_ticks()
 
     def game_start():
         mainloop = True
@@ -1093,7 +1092,6 @@ def multiplayer_ai():
 
 
     # player = TankConsumerClient('room-7')
-    start_ticks = pygame.time.get_ticks()
 
     def game_start():
         mainloop = True
@@ -1107,7 +1105,6 @@ def multiplayer_ai():
             screen.blit(background, background_rect)
             for event in pygame.event.get():
                 clock.tick(FPS)
-                seconds = (pygame.time.get_ticks() - start_ticks) / 1000  # calculate how many seconds
                 if event.type == pygame.QUIT:
                     mainloop = False
                     event_client.daemon = True
@@ -1119,18 +1116,14 @@ def multiplayer_ai():
                         pygame.quit()
                         client.connection.close()
                     if event.key in MOVE_KEYS:
-
                         client.turn_tank(client.token, MOVE_KEYS[event.key])
-
                     if event.key == pygame.K_SPACE:
                         client.fire_tank(client.token)
                         shoot_sound_player.play()
 
             try:
-
                 bullets = event_client.response['gameField']['bullets']
                 tanks = event_client.response['gameField']['tanks']
-
                 i = 30
                 pygame.draw.rect(screen, WHITE, (720, 10, 260, 40 * len(tanks)), 10)
                 table = {tank['id']:
@@ -1325,6 +1318,8 @@ def start_menu():
                 multiplayer()
             if pressed[pygame.K_3]:
                 multiplayer_ai()
+            if pressed[pygame.K_ESCAPE]:
+                pygame.quit()
 
 
 def end_menu():
@@ -1352,15 +1347,31 @@ def render(surface, text, size, x, y):
     surface.blit(text_surface, text_rect)
 
 
-def new_wall():
+def new_wall_static():
+    wallList = [
+        Wall(60, 700),
+        Wall(102, 700),
+        Wall(144, 700),
+        Wall(188, 700),
+        Wall(232, 700),
+        Wall(276, 700)
+    ]
+    # wall = Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT))
+    # all_sprites.add(wall)
+    # walls.add(wall)
+    all_sprites.add(wallList)
+    walls.add(wallList)
+
+
+def new_wall_dynamic():
     wall = Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT))
     all_sprites.add(wall)
     walls.add(wall)
 
 
 def create_wall():
-    for wall in range(10):
-        new_wall()
+    for wall in range(4):
+        new_wall_dynamic()
 
 
 New_Game = True
@@ -1372,23 +1383,32 @@ player_1 = PlayerTank(300, 300)
 player_2 = EnemyTank(100, 100)
 bullet_player_1 = Bullet(player_1.rect.x + int(player_2.width / 2), player_1.rect.y + int(player_2.width / 2), False)
 bullet_player_2 = Bullet(player_2.rect.x + int(player_2.width / 2), player_2.rect.y + int(player_2.width / 2), False)
+# wall_1 = Wall(300, 300)
+# wall_2 = Wall(400, 300)
+# wall_3 = Wall(500, 300)
+# wall_4 = Wall(600, 300)
+# wall_5 = Wall(700, 300)
 tanks = [player_1, player_2]
 bullets = [bullet_player_1, bullet_player_2]
+
 
 all_sprites = pygame.sprite.Group()
 first_ait_kit = pygame.sprite.Group()
 walls = pygame.sprite.Group()
+# walls_static = pygame.sprite.Group()
 player_bullets = pygame.sprite.Group()
 all_sprites.add(player_1)
 all_sprites.add(player_2)
+# all_sprites.add(wall_1, wall_2, wall_3, wall_4, wall_5)
+# all_sprites.add(walls_static)
 
 while Game:
     clock.tick(FPS)
     if New_Game:
         start_menu()
         New_Game = False
+        new_wall_static()
         create_wall()
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             Game = False
@@ -1404,10 +1424,7 @@ while Game:
                 if not bullet_player_2.drop:
                     bullet_player_2.drop = True
                     all_sprites.add(bullet_player_2)
-                    if player_2.power():
-                        bullet_player_2.power(player_2)
-                    else:
-                        bullet_player_2.shoot(player_2)
+                    bullet_player_2.shoot(player_2)
             for tank in tanks:
                 if event.key in tank.KEY.keys():
                     tank.change_direction(tank.KEY[event.key])
@@ -1444,6 +1461,7 @@ while Game:
     for hit_wall in hits_wall_player_2_bullet:
         explosion = Explosion(hit_wall.rect.center, 'wall')
         all_sprites.add(explosion)
+        bullet_player_2.drop = False
         bullet_player_2.kill()
 
     hits_player_2_walls = pygame.sprite.spritecollide(player_2, walls, True)
@@ -1462,6 +1480,7 @@ while Game:
     for hit_wall in hits_wall_player_1_bullet:
         explosion = Explosion(hit_wall.rect.center, 'wall')
         all_sprites.add(explosion)
+        bullet_player_1.drop = False
         bullet_player_1.kill()
 
     hits_player_1_walls = pygame.sprite.spritecollide(player_1, walls, True)
@@ -1473,7 +1492,7 @@ while Game:
     hits_super_power_player_1 = pygame.sprite.spritecollide(player_1, first_ait_kit, True)
     for hit_super_power in hits_super_power_player_1:
         player_1.power()
-        # bullet_player_1.shoot(player_1)
+
 
     if Game_Over:
         end_menu()
@@ -1482,6 +1501,9 @@ while Game:
     screen.fill(BLACK)
     all_sprites.draw(screen)
     # screen.blit(background, background_rect)
+
+    # for walls_static in wallList:
+    #     screen.blit(walls_static.image, (walls_static.rect.x, walls_static.rect.y))
 
     for tank in tanks:
         tank.move()
