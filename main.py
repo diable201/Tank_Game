@@ -34,6 +34,7 @@ pygame.mixer.music.set_volume(5)
 shoot_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'shoot_player.ogg'))
 shoot_sound_enemy = pygame.mixer.Sound(path.join(sound_dir, 'shoot_enemy.ogg'))
 explosion_sound_tank = pygame.mixer.Sound(path.join(sound_dir, 'explosion_tank.ogg'))
+boost_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'boost.ogg'))
 
 # Directories for textures
 background_dir = path.join(path.dirname(__file__), 'Textures/Background')
@@ -658,13 +659,13 @@ def multiplayer():
                          for tank in tanks
                          }
                 sorted_table = reversed(sorted(table.items(), key=lambda kv: kv[1]))
-                for score in sorted_table:
-                    if score[0] == client.tank_id:
+                for table in sorted_table:
+                    if table[0] == client.tank_id:
                         color = RED
                     else:
                         color = BLUE
                     text = font.render(
-                        'ID:' + str(score[0]) + ' Scores: ' + str(score[1][0]) + ' Lives : ' + str(score[1][1]), True,
+                        'ID:' + str(table[0]) + ' Scores: ' + str(table[1][0]) + ' Lives : ' + str(table[1][1]), True,
                         color)
                     textRect = text.get_rect()
                     textRect.center = (850, i)
@@ -977,7 +978,7 @@ def multiplayer_ai():
                     )
                 )
             )
-            self.radius = 800
+            # self.radius = 800
             self.channel = self.connection.channel()
             queue = self.channel.queue_declare(queue='',
                                                auto_delete=True,
@@ -1107,7 +1108,7 @@ def multiplayer_ai():
             try:
                 bullets = event_client.response['gameField']['bullets']
                 tanks = event_client.response['gameField']['tanks']
-                i = 30
+                i = 35
                 pygame.draw.rect(screen, WHITE, (720, 10, 260, 40 * len(tanks)), 10)
                 table = {tank['id']:
                              [tank['score'],
@@ -1115,13 +1116,13 @@ def multiplayer_ai():
                          for tank in tanks
                          }
                 sorted_table = reversed(sorted(table.items(), key=lambda kv: kv[1]))
-                for score in sorted_table:
-                    if score[0] == client.tank_id:
+                for table in sorted_table:
+                    if table[0] == client.tank_id:
                         color = RED
                     else:
                         color = BLUE
                     text = font.render(
-                        'ID:' + str(score[0]) + ' Scores: ' + str(score[1][0]) + ' Lives : ' + str(score[1][1]), True,
+                        'ID:' + str(table[0]) + ' Scores: ' + str(table[1][0]) + ' Lives : ' + str(table[1][1]), True,
                         color)
                     textRect = text.get_rect()
                     textRect.center = (850, i)
@@ -1149,6 +1150,7 @@ def multiplayer_ai():
 
                     if tank_id != client.tank_id:
                         for coordinate in range(my_tank_x, my_tank_x + 100):
+
                             if not_my_tank_x == coordinate:
                                 if not_my_tank_y > my_tank_y:
                                     direction_movement = 'UP'
@@ -1161,6 +1163,7 @@ def multiplayer_ai():
                                     shoot_sound_player.play()
 
                         for coordinate in range(my_tank_y, my_tank_y + 100):
+
                             if not_my_tank_x == coordinate:
                                 if my_tank_x > not_my_tank_x:
                                     direction_movement = 'RIGHT'
@@ -1171,7 +1174,10 @@ def multiplayer_ai():
                                     direction_movement = 'LEFT'
                                     client.fire_tank(client.token)
                                     shoot_sound_player.play()
+
                     client.turn_tank(client.token, direction_movement)
+
+
 
                     remaining_time = event_client.response['remainingTime']
                     text = font.render('Remaining Time: {}'.format(remaining_time), True, WHITE)
@@ -1476,6 +1482,7 @@ while Game:
 
     hits_super_power_player_2 = pygame.sprite.spritecollide(player_2, first_ait_kit, True)
     for hit_super_power in hits_super_power_player_2:
+        boost_sound_player.play()
         player_2.power()
 
     #################################PLAYER 1###########################################
@@ -1494,6 +1501,7 @@ while Game:
 
     hits_super_power_player_1 = pygame.sprite.spritecollide(player_1, first_ait_kit, True)
     for hit_super_power in hits_super_power_player_1:
+        boost_sound_player.play()
         player_1.power()
 
     if Game_Over:
