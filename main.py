@@ -612,7 +612,7 @@ def multiplayer():
                 pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/Shell_4.png'), (5, 15))
             screen.blit(my_im, (x, y))
 
-    player = TankConsumerClient('room-7')
+    player = TankConsumerClient('room-10')
 
     def game_start():
         mainloop = True
@@ -722,6 +722,7 @@ def multiplayer():
                         draw_bullet(bullet_x, bullet_y, bullet_width, bullet_height, bullet_direction)
                     if client.tank_id != tank['id']:
                         draw_enemy_bullet(**bullet)
+
             except:
                 pass
 
@@ -835,17 +836,15 @@ def multiplayer():
             if Kicked:
                 kicked()
 
-
-
             pygame.display.flip()
         client.connection.close()
         pygame.quit()
 
     client = TankRpcClient()
     client.check_server_status()
-    client.obtain_token('room-9')
+    client.obtain_token('room-10')
 
-    event_client = TankConsumerClient('room-9')
+    event_client = TankConsumerClient('room-10')
     event_client.start()
     game_start()
 
@@ -907,10 +906,10 @@ def multiplayer_ai():
         def on_response(self, ch, method, props, body):
             if self.corr_id == props.correlation_id:
                 self.response = json.loads(body)
-                print(self.response)
+                # print(self.response)
+
 
         def call(self, key, message={}):
-
             # message = {}
             # if message is None:
             self.response = None
@@ -940,7 +939,6 @@ def multiplayer_ai():
                 self.token = self.response['token']
                 self.tank_id = self.response['tankId']
                 self.room_id = self.response['roomId']
-
                 return True
             return False
 
@@ -973,6 +971,7 @@ def multiplayer_ai():
                     )
                 )
             )
+            self.radius = 800
             self.channel = self.connection.channel()
             queue = self.channel.queue_declare(queue='',
                                                auto_delete=True,
@@ -992,7 +991,8 @@ def multiplayer_ai():
 
         def on_response(self, ch, method, props, body):
             self.response = json.loads(body)
-            print(self.response)
+            # if client.tank_id:
+            #     print(self.response)
 
         def run(self):
             self.channel.start_consuming()
@@ -1001,7 +1001,6 @@ def multiplayer_ai():
             self.channel.stop_consuming()
 
         def draw_tank(self, x, y, direction, **kwargs):
-
             if direction == UP:
                 tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_1.png')
                 screen.blit(tank_image, (x, y))
@@ -1030,8 +1029,7 @@ def multiplayer_ai():
         pygame.K_d: RIGHT
     }
 
-    def draw_tank(x, y, direction, **kwargs):
-
+    def draw_enemy_tank(x, y, direction, **kwargs):
         if direction == UP:
             tank_image = pygame.image.load('/Users/sanzhar/Tank_Game-/Textures/Player_Multiplayer/player_2_1.png')
             screen.blit(tank_image, (x, y))
@@ -1070,28 +1068,27 @@ def multiplayer_ai():
             screen.blit(my_im, (x, y))
 
 
-    def ai(x, y, width, height, direction, **kwargs):
-        # print(**kwargs)
-        if x <= 750:
-            client.turn_tank(client.token, RIGHT)
-            client.fire_tank(client.token)
+    # def ai(x, y, width, height, direction, **kwargs):
+    #     print(**kwargs)
+        # if x <= 750:
+        #     client.turn_tank(client.token, RIGHT)
+        #     client.fire_tank(client.token)
         # elif x > 750:
         #     client.turn_tank(client.token, DOWN)
         #     client.fire_tank(client.token)
-        # elif x > 750 and y > 50:
+        # elif y > 500:
         #     client.turn_tank(client.token, UP)
         #     client.fire_tank(client.token)
         # elif x > 600:
         #     client.turn_tank(client.token, DOWN)
         # elif x == 600:
         #     client.turn_tank(client.token, DOWN)
-        tank_c = (x + int(width / 2), y + int(width / 2))
-        pygame.draw.rect(screen, (255, 0, 0),
-                         (x, y, width, width), 2)
-        pygame.draw.circle(screen, (255, 0, 0), tank_c, int(width / 2))
+        # tank_c = (x + int(width / 2), y + int(width / 2))
+        # pygame.draw.rect(screen, (255, 0, 0),
+        #                  (x, y, width, width), 2)
+        # pygame.draw.circle(screen, (255, 0, 0), tank_c, int(width / 2))
 
-
-    # player = TankConsumerClient('room-7')
+    player = TankConsumerClient('room-8')
 
     def game_start():
         mainloop = True
@@ -1099,7 +1096,7 @@ def multiplayer_ai():
         Win = False
         Lose = False
         Kicked = False
-
+        start_ticks = pygame.time.get_ticks()
         while mainloop:
             screen.fill(BLACK)
             screen.blit(background, background_rect)
@@ -1146,9 +1143,20 @@ def multiplayer_ai():
                     i += 35
 
                 for tank in tanks:
-                    ai(**tank)
-                    # else:
-                    #     draw_tank(**tank)
+                    if client.tank_id == tank['id']:
+                        player.draw_tank(**tank)
+                    else:
+                        draw_enemy_tank(**tank)
+                    if client.tank_id == tank['id']:
+                        # if client.response:
+                        # seconds = (pygame.time.get_ticks() - start_ticks) / 1000  # calculate how many seconds
+                        if tank['id'] != client.tank_id and tank['x'] <= 750:
+                            client.turn_tank(client.token, RIGHT)
+                        # elif tank['y'] > 500:
+                        #     client.turn_tank(client.token, UP)
+                        # elif tank['id'] != client.tank_id and tank['x'] == player.radius:
+                        #     client.turn_tank(client.token, RIGHT)
+
                     # tank_x = tank['x']
                     # tank_y = tank['y']
                     # tank_width = tank['width']
@@ -1356,9 +1364,6 @@ def new_wall_static():
         Wall(232, 700),
         Wall(276, 700)
     ]
-    # wall = Wall(random.randrange(0, WIDTH), random.randrange(0, HEIGHT))
-    # all_sprites.add(wall)
-    # walls.add(wall)
     all_sprites.add(wallList)
     walls.add(wallList)
 
@@ -1383,11 +1388,6 @@ player_1 = PlayerTank(300, 300)
 player_2 = EnemyTank(100, 100)
 bullet_player_1 = Bullet(player_1.rect.x + int(player_2.width / 2), player_1.rect.y + int(player_2.width / 2), False)
 bullet_player_2 = Bullet(player_2.rect.x + int(player_2.width / 2), player_2.rect.y + int(player_2.width / 2), False)
-# wall_1 = Wall(300, 300)
-# wall_2 = Wall(400, 300)
-# wall_3 = Wall(500, 300)
-# wall_4 = Wall(600, 300)
-# wall_5 = Wall(700, 300)
 tanks = [player_1, player_2]
 bullets = [bullet_player_1, bullet_player_2]
 
@@ -1395,12 +1395,9 @@ bullets = [bullet_player_1, bullet_player_2]
 all_sprites = pygame.sprite.Group()
 first_ait_kit = pygame.sprite.Group()
 walls = pygame.sprite.Group()
-# walls_static = pygame.sprite.Group()
 player_bullets = pygame.sprite.Group()
 all_sprites.add(player_1)
 all_sprites.add(player_2)
-# all_sprites.add(wall_1, wall_2, wall_3, wall_4, wall_5)
-# all_sprites.add(walls_static)
 
 while Game:
     clock.tick(FPS)
@@ -1456,7 +1453,6 @@ while Game:
     all_sprites.update()
 
     #################################PLAYER 2###########################################
-
     hits_wall_player_2_bullet = pygame.sprite.spritecollide(bullet_player_2, walls, True)
     for hit_wall in hits_wall_player_2_bullet:
         explosion = Explosion(hit_wall.rect.center, 'wall')
@@ -1475,7 +1471,6 @@ while Game:
         player_2.power()
 
     #################################PLAYER 1###########################################
-
     hits_wall_player_1_bullet = pygame.sprite.spritecollide(bullet_player_1, walls, True)
     for hit_wall in hits_wall_player_1_bullet:
         explosion = Explosion(hit_wall.rect.center, 'wall')
@@ -1493,7 +1488,6 @@ while Game:
     for hit_super_power in hits_super_power_player_1:
         player_1.power()
 
-
     if Game_Over:
         end_menu()
         Game_Over = False
@@ -1501,9 +1495,6 @@ while Game:
     screen.fill(BLACK)
     all_sprites.draw(screen)
     # screen.blit(background, background_rect)
-
-    # for walls_static in wallList:
-    #     screen.blit(walls_static.image, (walls_static.rect.x, walls_static.rect.y))
 
     for tank in tanks:
         tank.move()
