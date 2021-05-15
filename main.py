@@ -85,8 +85,12 @@ class PlayerTank(pygame.sprite.Sprite):
         self.lives = 3
         self.width = 25
         self.direction = Direction.RIGHT
-        self.KEY = {d_right: Direction.RIGHT, d_left: Direction.LEFT,
-                    d_up: Direction.UP, d_down: Direction.DOWN}
+        self.KEY = {
+            d_right: Direction.RIGHT, 
+            d_left: Direction.LEFT,
+            d_up: Direction.UP, 
+            d_down: Direction.DOWN
+        }
         self.scores = 0
 
     def draw(self):
@@ -402,11 +406,11 @@ def multiplayer():
     HEIGHT = 800
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Armored Kill')
-    IP = '34.254.177.17'
+    IP = 'ip'
     PORT = 5672
-    VIRTUAL_HOST = 'dar-tanks'
-    USERNAME = 'dar-tanks'
-    PASSWORD = '5orPLExUYnyVYZg48caMpX'
+    VIRTUAL_HOST = 'virtual_host'
+    USERNAME = 'username'
+    PASSWORD = 'password'
 
     sound_dir = path.join(path.dirname(__file__), 'Sound')
     pygame.mixer.init()
@@ -862,11 +866,11 @@ def multiplayer_ai():
     HEIGHT = 800
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Armored Kill')
-    IP = '34.254.177.17'
+    IP = 'ip'
     PORT = 5672
-    VIRTUAL_HOST = 'dar-tanks'
-    USERNAME = 'dar-tanks'
-    PASSWORD = '5orPLExUYnyVYZg48caMpX'
+    VIRTUAL_HOST = 'virtual_host'
+    USERNAME = 'username'
+    PASSWORD = 'password'
 
     sound_dir = path.join(path.dirname(__file__), 'Sound')
     pygame.mixer.init()
