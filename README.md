@@ -1,5 +1,9 @@
 # ℹ️ Tank Game
-The tank game using Python 3 and Library Pygame.
+### The tank game using Python 3 and Library Pygame. The game was made for an exam.
+### 3 game modes were available.
+* Single Mode
+* Multiplayer Mode (no longer available)
+* Multiplayer with AI Mode (no longer available)
 
 ![Screen_1](Screenshots/screen.png)
 
