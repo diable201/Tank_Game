@@ -688,42 +688,6 @@ def multiplayer():
                     textRect.center = (100, 20)
                     screen.blit(text, textRect)
 
-                    # Only for 2 players. Sadface.
-                    # if tank['id'] == client.tank_id:
-                    #     text = font.render('ID: {}'.format(client.tank_id), True, WHITE)
-                    #     textRect = text.get_rect()
-                    #     textRect.center = (850, 150)
-                    #     screen.blit(text, textRect)
-                    # else:
-                    #     text = font.render('Not My ID: {}'.format(tank['id']), True, BLACK)
-                    #     textRect = text.get_rect()
-                    #     textRect.center = (850, 300)
-                    #     screen.blit(text, textRect)
-                    # if tank['id'] == client.tank_id:
-                    #     my_score = tank['score']
-                    #     text = font.render('My Scores: {}'.format(my_score), True, WHITE)
-                    #     textRect = text.get_rect()
-                    #     textRect.center = (850, 200)
-                    #     screen.blit(text, textRect)
-                    # else:
-                    #     not_my_score = tank['score']
-                    #     text = font.render('Not My Scores: {}'.format(not_my_score), True, BLACK)
-                    #     textRect = text.get_rect()
-                    #     textRect.center = (850, 350)
-                    #     screen.blit(text, textRect)
-                    # if tank['id'] == client.tank_id:
-                    #     my_health = tank['health']
-                    #     text = font.render('My Lives: {}'.format(my_health), True, WHITE)
-                    #     textRect = text.get_rect()
-                    #     textRect.center = (850, 250)
-                    #     screen.blit(text, textRect)
-                    # else:
-                    #     not_my_health = tank['health']
-                    #     text = font.render('Not my Lives: {}'.format(not_my_health), True, BLACK)
-                    #     textRect = text.get_rect()
-                    #     textRect.center = (850, 400)
-                    #     screen.blit(text, textRect)
-
                 for bullet in bullets:
                     if client.tank_id:
                         bullet_x = bullet['x']
